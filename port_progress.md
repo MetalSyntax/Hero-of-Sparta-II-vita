@@ -231,6 +231,34 @@ Port of **Hero of Sparta II** (iOS Mach-O) to PlayStation Vita using a custom na
     5. Added fallback in `d_fopen` to check `BUNDLE_PATH` if an absolute path starting with `/` is not found in `DATA_PATH`.
     6. Rebuilt clean `build/eboot.bin` and `build/heroofspartaii.vpk`.
 
+- [x] Analyzed real-hardware crash dump `heroofspartaii-psp2core-1793208782-0x000fec24bf-eboot.bin.psp2dmp` and `logs/heroofspartaii_008.log`:
+  - **Progress:** XML parser and `_DefaultRuneLocale` fix from Run 7 worked perfectly! The shader and material subsystems loaded successfully, and the game advanced into scene / state initialization.
+  - **Crash Location:** `PC: 0x002041fc`, Exception: `0x30003` (Prefetch abort exception) in thread `pthread` (`0x4001014b`).
+  - **Root Cause Identified (ARM Switch Jump Tables in `__TEXT`):**
+    - The crash PC `0x002041fc` is a low unslid address in `__TEXT.__text` (`0x002041fc` instead of `0x982041fc`).
+    - Disassembling callers and cross-referencing `0x002041fc` revealed an ARM switch jump table at `0x00203b38`:
+      ```arm
+      0x203b34:  cmp   r0, #7
+      0x203b38:  ldrls pc, [pc, r0, lsl #2]
+      0x203b3c:  b     0x203b90
+      0x203b40:  .long 0x002041fc  ; Entry 0
+      0x203b44:  .long 0x00204210  ; Entry 1
+      0x203b48:  .long 0x00204224  ; Entry 2
+      ...
+      ```
+    - In ARMv6/v7, the compiler generates jump tables placed directly in `__TEXT.__text` at `pc + 8`, indexed by `[pc, reg, lsl #2]`. Each entry contains a 32-bit absolute address pointing to code in `__TEXT.__text`.
+    - Previous `tools/macho_prep.py` only relocated literal pools referenced via `ldr reg, [pc, #imm]` and rejected or missed jump tables. As a result, none of the switch jump tables in `__TEXT` were in `rebase.bin`.
+    - When the game hit the `switch()` statement, `ldrls pc, [pc, r0, lsl #2]` loaded the unslid address `0x002041fc` into `PC`, immediately crashing with a Prefetch abort.
+  - **Resolution Applied:**
+    - Updated [tools/macho_prep.py](file:///Volumes/TOSHIBA%20EXT/PSVITA%20Develop/Hero-of-Sparta-II-vita/tools/macho_prep.py) with dedicated ARM switch jump table detection:
+      - Identifies all `ldr pc, [pc, rm, lsl #2]` instructions.
+      - Recovers the jump table bounds from preceding `cmp` / `mov` instructions.
+      - Validates and captures all consecutive 32-bit code targets within `__TEXT.__text`.
+    - Discovered and relocated **all 285 switch jump tables (2,456 total entries)** across the game executable.
+    - Total rebase inventory expanded from 36,871 to **39,327 words**.
+    - Regenerated [ux0_data/heroofspartaii/rebase.bin](file:///Volumes/TOSHIBA%20EXT/PSVITA%20Develop/Hero-of-Sparta-II-vita/ux0_data/heroofspartaii/rebase.bin).
+    - Rebuilt clean `build/eboot.bin` and `build/heroofspartaii.vpk`.
+
 ---
 
 ## On-Console Deployment Instructions

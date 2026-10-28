@@ -327,6 +327,48 @@ def main():
                         rebase.add(tva)
                         stats[('__text_lit', s['name'])] += 1
 
+    # 1b. Relocate switch jump tables in __TEXT.__text
+    # Pattern: ldr pc, [pc, rm, lsl #2] where the table starts at (va + 8)
+    for i in range(0, len(code_bytes) - 3, 4):
+        va = text_sec['addr'] + i
+        w = struct.unpack_from('<I', code_bytes, i)[0]
+        if (w & 0x0FFFFFF0) == 0x079FF100:
+            table_start = va + 8
+            cmp_limit = None
+            for back in range(4, 28, 4):
+                prev_pc = va - back
+                prev_idx = prev_pc - text_sec['addr']
+                if prev_idx < 0:
+                    break
+                prev = struct.unpack_from('<I', code_bytes, prev_idx)[0]
+                if (prev & 0x0DF00000) == 0x01500000:
+                    rot = (prev >> 8) & 0xF
+                    val = prev & 0xFF
+                    if rot > 0:
+                        val = ((val >> (rot * 2)) | (val << (32 - rot * 2))) & 0xFFFFFFFF
+                    cmp_limit = val + 1
+                    break
+                if (prev & 0x0DF00000) == 0x01A00000 and (prev & 0x000F0000) == 0:
+                    rot = (prev >> 8) & 0xF
+                    val = prev & 0xFF
+                    if rot > 0:
+                        val = ((val >> (rot * 2)) | (val << (32 - rot * 2))) & 0xFFFFFFFF
+                    if cmp_limit is None and val < 256:
+                        cmp_limit = val + 1
+
+            limit = cmp_limit if (cmp_limit is not None and cmp_limit <= 512) else 512
+            for idx in range(limit):
+                ea = table_start + idx * 4
+                e_off = ea - text_sec['addr']
+                if e_off + 4 > len(code_bytes):
+                    break
+                dest = struct.unpack_from('<I', code_bytes, e_off)[0]
+                if text_sec['addr'] <= dest < text_sec['addr'] + text_sec['size'] and (dest & 3) == 0:
+                    rebase.add(ea)
+                    stats[('__text_jumptable', 'entry')] += 1
+                else:
+                    break
+
     # 2. Relocate __symbol_stub4 targets
     stubs = next((s for s in sects if s['name'] == '__symbol_stub4'), None)
     if stubs:
