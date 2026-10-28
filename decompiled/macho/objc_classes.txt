@@ -1,0 +1,4382 @@
+/Volumes/TOSHIBA EXT/PSVITA Develop/Hero-of-Sparta-II-vita/game_app/HOS2:
+Contents of (__DATA,__objc_classlist) section
+00349f34 0x347c88
+    isa        0x347c74
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x34850c
+        flags          0x0
+        instanceStart  4
+        instanceSize   52
+        ivarLayout     0x0
+        name           0x3274ea Accelerometer
+        baseMethods    0x3484bc
+            entsize 12
+            count   2
+            name    0x3274cd accelerometer:didAccelerate:
+            types   0x327868 v16@0:4@8@12
+            imp     0x18d8e0
+            name    0x32aeec init
+            types   0x3312d8 @8@0:4
+            imp     0x18da40
+        baseProtocols  0x3484dc
+            count    1
+            list[0]  0x34a734
+                isa       0x0
+                name      0x327523 UIAccelerometerDelegate
+                protocols 0x348560
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x34854c
+                    entsize 12
+                    count   1
+                    name    0x3274cd accelerometer:didAccelerate:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x348410
+            entsize   20
+            count     6
+            offset    0x348534 4
+            name      0x32747b accel_x
+            type      0x327483 d
+            alignment 2
+            size      8
+            offset    0x348538 12
+            name      0x327485 accel_y
+            type      0x327483 d
+            alignment 2
+            size      8
+            offset    0x34853c 20
+            name      0x32748d accel_z
+            type      0x327483 d
+            alignment 2
+            size      8
+            offset    0x348540 28
+            name      0x327495 dx
+            type      0x327483 d
+            alignment 2
+            size      8
+            offset    0x348544 36
+            name      0x327498 dy
+            type      0x327483 d
+            alignment 2
+            size      8
+            offset    0x348548 44
+            name      0x32749b dz
+            type      0x327483 d
+            alignment 2
+            size      8
+        weakIvarLayout 0x0
+        baseProperties 0x0
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x3484e4
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x3274ea Accelerometer
+        baseMethods    0x348490
+            entsize 12
+            count   3
+            name    0x32749e enableUpdates
+            types   0x3282a4 v8@0:4
+            imp     0x18d7f0
+            name    0x3274ac disableUpdates
+            types   0x3282a4 v8@0:4
+            imp     0x18d840
+            name    0x3274bb getSharedInstance
+            types   0x3312d8 @8@0:4
+            imp     0x18d880
+        baseProtocols  0x3484dc
+            count    1
+            list[0]  0x34a734
+                isa       0x0
+                name      0x327523 UIAccelerometerDelegate
+                protocols 0x348560
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x34854c
+                    entsize 12
+                    count   1
+                    name    0x3274cd accelerometer:didAccelerate:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f38 0x347cb0
+    isa        0x347c9c
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348854
+        flags          0x0
+        instanceStart  4
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x327a80 AppController
+        baseMethods    0x3486c0
+            entsize 12
+            count   27
+            name    0x32783d set_glView:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e740
+            name    0x3277ec _glView
+            types   0x3312d8 @8@0:4
+            imp     0x18db40
+            name    0x32da42 connectionDidFinishLoading:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e490
+            name    0x32784b connection:didFailWithError:
+            types   0x327868 v16@0:4@8@12
+            imp     0x18e5c0
+            name    0x32da5e connection:didReceiveData:
+            types   0x327868 v16@0:4@8@12
+            imp     0x18db60
+            name    0x327878 connection:didReceiveResponse:
+            types   0x327868 v16@0:4@8@12
+            imp     0x18db90
+            name    0x327897 buttonEventGet::::::
+            types   0x3278ac v32@0:4i8i12@16i20i24i28
+            imp     0x18e780
+            name    0x3278c5 startTwitter:
+            types   0x3278d3 v12@0:4^v8
+            imp     0x18e400
+            name    0x3278de setStatusBar:
+            types   0x3278d3 v12@0:4^v8
+            imp     0x18dbc0
+            name    0x3278ec sendGameInfo
+            types   0x3282a4 v8@0:4
+            imp     0x18dc70
+            name    0x3278fc stopMovie:
+            types   0x3278d3 v12@0:4^v8
+            imp     0x18e3f0
+            name    0x327907 startMovie:
+            types   0x3278d3 v12@0:4^v8
+            imp     0x18e3e0
+            name    0x327e30 loadMovie:
+            types   0x3278d3 v12@0:4^v8
+            imp     0x18e3c0
+            name    0x327916 renderGLLive:
+            types   0x3278d3 v12@0:4^v8
+            imp     0x18e3b0
+            name    0x327924 startIGP
+            types   0x3282a4 v8@0:4
+            imp     0x18dcb0
+            name    0x32792d applicationDidReceiveMemoryWarning:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e3a0
+            name    0x327951 didRotate:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e390
+            name    0x32795c applicationWillEnterForeground:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18dd60
+            name    0x32797c applicationDidEnterBackground:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18db10
+            name    0x32799b applicationWillHide:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e330
+            name    0x3279b0 applicationDidBecomeActive:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e370
+            name    0x3279cc applicationWillResignActive:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e350
+            name    0x32830c dealloc
+            types   0x3282a4 v8@0:4
+            imp     0x18e2b0
+            name    0x3279e9 applicationWillTerminate:
+            types   0x32ad5c v12@0:4@8
+            imp     0x18e280
+            name    0x327a03 application:didFinishLaunchingWithOptions:
+            types   0x327a2e c16@0:4@8@12
+            imp     0x18e050
+            name    0x327a3b initDisplay
+            types   0x3282a4 v8@0:4
+            imp     0x18de10
+            name    0x327a47 _renderTeapot
+            types   0x3282a4 v8@0:4
+            imp     0x18ddd0
+        baseProtocols  0x348824
+            count    1
+            list[0]  0x34a7ec
+                isa       0x0
+                name      0x327d7e EAGLViewDelegate
+                protocols 0x3488a0
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x34888c
+                    entsize 12
+                    count   1
+                    name    0x327d61 didResizeEAGLSurfaceForView:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x348654
+            entsize   20
+            count     4
+            offset    0x348880 4
+            name      0x3277d8 _window
+            type      0x3277e0 @"UIWindow"
+            alignment 2
+            size      4
+            offset    0x34887c 8
+            name      0x3277ec _glView
+            type      0x3277f4 @"EAGLView"
+            alignment 2
+            size      4
+            offset    0x348884 12
+            name      0x327800 _activity
+            type      0x32d590 @"UIActivityIndicatorView"
+            alignment 2
+            size      4
+            offset    0x348888 16
+            name      0x32780d receivedData
+            type      0x32781a @"NSMutableData"
+            alignment 2
+            size      4
+        weakIvarLayout 0x0
+        baseProperties 0x34880c
+            entsize    8
+            count      2
+            name       0x3277d8 _window
+            attributes 0x327a55 T@"UIWindow",&,N
+            name       0x3277ec _glView
+            attributes 0x327a66 T@"EAGLView",&,N,V_glView
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x34882c
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x327a80 AppController
+        baseMethods    0x3486ac
+            entsize 12
+            count   1
+            name    0x32782b sharedInstance
+            types   0x3312d8 @8@0:4
+            imp     0x18daf0
+        baseProtocols  0x348824
+            count    1
+            list[0]  0x34a7ec
+                isa       0x0
+                name      0x327d7e EAGLViewDelegate
+                protocols 0x3488a0
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x34888c
+                    entsize 12
+                    count   1
+                    name    0x327d61 didResizeEAGLSurfaceForView:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f3c 0x347cd8
+    isa        0x347cc4
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348b60
+        flags          0x0
+        instanceStart  44
+        instanceSize   128
+        ivarLayout     0x0
+        name           0x328464 EAGLView
+        baseMethods    0x3489a0
+            entsize 12
+            count   28
+            name    0x32e21a setDelegate:
+            types   0x32ad5c v12@0:4@8
+            imp     0x190610
+            name    0x3280f0 delegate
+            types   0x3312d8 @8@0:4
+            imp     0x1905f0
+            name    0x3280fc setAutoresizesSurface:
+            types   0x328113 v12@0:4c8
+            imp     0x1905d0
+            name    0x32841e autoresizesSurface
+            types   0x327ddc c8@0:4
+            imp     0x1905b0
+            name    0x32811f surfaceSize
+            types   0x32812b {CGSize=ff}8@0:4
+            imp     0x190580
+            name    0x32813c framebuffer
+            types   0x328148 I8@0:4
+            imp     0x190560
+            name    0x3283c0 pixelFormat
+            types   0x3312d8 @8@0:4
+            imp     0x190540
+            name    0x32814f depthFormat
+            types   0x328148 I8@0:4
+            imp     0x190520
+            name    0x32815b context
+            types   0x3312d8 @8@0:4
+            imp     0x190500
+            name    0x328163 handleTouchInIGP:
+            types   0x32ad5c v12@0:4@8
+            imp     0x191000
+            name    0x328175 touchesCancelled:withEvent:
+            types   0x327868 v16@0:4@8@12
+            imp     0x191580
+            name    0x328192 touchesEnded:withEvent:
+            types   0x327868 v16@0:4@8@12
+            imp     0x1917a0
+            name    0x3281aa touchesMoved:withEvent:
+            types   0x327868 v16@0:4@8@12
+            imp     0x1919d0
+            name    0x3281c2 touchesBegan:withEvent:
+            types   0x327868 v16@0:4@8@12
+            imp     0x191c00
+            name    0x3281da touchesChangedWithEvent:
+            types   0x32ad5c v12@0:4@8
+            imp     0x1912a0
+            name    0x3281f3 convertRectFromViewToSurface:
+            types   0x328211 {CGRect={CGPoint=ff}{CGSize=ff}}24@0:4{CGRect={CGPoint=ff}{CGSize=ff}}8
+            imp     0x1906f0
+            name    0x328259 convertPointFromViewToSurface:
+            types   0x328278 {CGPoint=ff}16@0:4{CGPoint=ff}8
+            imp     0x1907b0
+            name    0x328298 swapBuffers
+            types   0x3282a4 v8@0:4
+            imp     0x190940
+            name    0x3282ab clearCurrentContext
+            types   0x3282a4 v8@0:4
+            imp     0x190a60
+            name    0x3282bf isCurrentContext
+            types   0x327ddc c8@0:4
+            imp     0x190630
+            name    0x3282d0 setCurrentContext
+            types   0x3282a4 v8@0:4
+            imp     0x190ab0
+            name    0x3282e2 setAutoresizesEAGLSurface:
+            types   0x328113 v12@0:4c8
+            imp     0x190680
+            name    0x3282fd layoutSubviews
+            types   0x3282a4 v8@0:4
+            imp     0x190860
+            name    0x32830c dealloc
+            types   0x3282a4 v8@0:4
+            imp     0x190e70
+            name    0x327d44 initWithFrame:
+            types   0x328317 @24@0:4{CGRect={CGPoint=ff}{CGSize=ff}}8
+            imp     0x190ef0
+            name    0x328340 _destroySurface
+            types   0x3282a4 v8@0:4
+            imp     0x1904f0
+            name    0x328350 _createSurface
+            types   0x327ddc c8@0:4
+            imp     0x190b10
+            name    0x32835f shouldAutorotateToInterfaceOrientation:
+            types   0x328387 c12@0:4i8
+            imp     0x1904e0
+        baseProtocols  0x0
+        ivars          0x3488a8
+            entsize   20
+            count     11
+            offset    0x348b88 44
+            name      0x328011 _format
+            type      0x32d6fa @"NSString"
+            alignment 2
+            size      4
+            offset    0x348b8c 48
+            name      0x328019 _depthFormat
+            type      0x328026 I
+            alignment 2
+            size      4
+            offset    0x348b90 52
+            name      0x328028 _autoresize
+            type      0x328034 c
+            alignment 0
+            size      1
+            offset    0x348b94 56
+            name      0x328036 _context
+            type      0x32803f @"EAGLContext"
+            alignment 2
+            size      4
+            offset    0x348b98 60
+            name      0x32804e _framebuffer
+            type      0x328026 I
+            alignment 2
+            size      4
+            offset    0x348b9c 64
+            name      0x32805b _renderbuffer
+            type      0x328026 I
+            alignment 2
+            size      4
+            offset    0x348ba0 68
+            name      0x328069 _depthBuffer
+            type      0x328026 I
+            alignment 2
+            size      4
+            offset    0x348ba4 72
+            name      0x328076 _size
+            type      0x32807c {CGSize="width"f"height"f}
+            alignment 2
+            size      8
+            offset    0x348ba8 80
+            name      0x328097 _hasBeenCurrent
+            type      0x328034 c
+            alignment 0
+            size      1
+            offset    0x348bac 84
+            name      0x3280a7 _delegate
+            type      0x3280b1 @"<EAGLViewDelegate>"
+            alignment 2
+            size      4
+            offset    0x348bb0 88
+            name      0x3280c7 m_crtTouches
+            type      0x3280d4 [10@"UITouch"]
+            alignment 2
+            size      40
+        weakIvarLayout 0x0
+        baseProperties 0x348af8
+            entsize    8
+            count      7
+            name       0x32815b context
+            attributes 0x328391 T@"EAGLContext",R,V_context
+            name       0x32814f depthFormat
+            attributes 0x3283ad TI,R,V_depthFormat
+            name       0x3283c0 pixelFormat
+            attributes 0x3283cc T@"NSString",R,V_format
+            name       0x32813c framebuffer
+            attributes 0x3283e4 TI,R,V_framebuffer
+            name       0x32811f surfaceSize
+            attributes 0x3283f7 T{CGSize="width"f"height"f},R,N,V_size
+            name       0x32841e autoresizesSurface
+            attributes 0x328431 Tc,V_autoresize
+            name       0x3280f0 delegate
+            attributes 0x328442 T@"<EAGLViewDelegate>",V_delegate
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348b38
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x328464 EAGLView
+        baseMethods    0x34898c
+            entsize 12
+            count   1
+            name    0x3280e3 layerClass
+            types   0x33134c #8@0:4
+            imp     0x1906c0
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f40 0x347d00
+    isa        0x347cec
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348ce4
+        flags          0x0
+        instanceStart  4
+        instanceSize   14
+        ivarLayout     0x0
+        name           0x32add5 MoviePlayer
+        baseMethods    0x348c0c
+            entsize 12
+            count   14
+            name    0x32830c dealloc
+            types   0x3282a4 v8@0:4
+            imp     0x215910
+            name    0x32acd9 freeMovie
+            types   0x3282a4 v8@0:4
+            imp     0x215960
+            name    0x32835f shouldAutorotateToInterfaceOrientation:
+            types   0x328387 c12@0:4i8
+            imp     0x2156f0
+            name    0x32ace5 movieSubtitles_reset
+            types   0x3282a4 v8@0:4
+            imp     0x215a50
+            name    0x32acfa movieSubtitles_init
+            types   0x3282a4 v8@0:4
+            imp     0x215d00
+            name    0x32ad0e isLoading
+            types   0x32ad18 C8@0:4
+            imp     0x2156e0
+            name    0x32ad1f isPlaying
+            types   0x32ad18 C8@0:4
+            imp     0x2156c0
+            name    0x32ad29 stopMovie
+            types   0x3282a4 v8@0:4
+            imp     0x215f80
+            name    0x32ad33 playMovie
+            types   0x3282a4 v8@0:4
+            imp     0x216070
+            name    0x32ad3d moviePlayBackLoadStateChanged:
+            types   0x32ad5c v12@0:4@8
+            imp     0x215b00
+            name    0x32ad66 moviePlayBackStateChange:
+            types   0x32ad5c v12@0:4@8
+            imp     0x215bd0
+            name    0x32ad80 moviePreloadDidFinish:
+            types   0x32ad5c v12@0:4@8
+            imp     0x215c80
+            name    0x32ad97 moviePlayBackDidFinish:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2156a0
+            name    0x32adaf initWithFile:andFlipped:
+            types   0x32adc8 @16@0:4@8C12
+            imp     0x216170
+        baseProtocols  0x0
+        ivars          0x348bb4
+            entsize   20
+            count     4
+            offset    0x348d70 4
+            name      0x32ac7f mMoviePlayer
+            type      0x32ac8c @"UIViewController"
+            alignment 2
+            size      4
+            offset    0x348d74 8
+            name      0x32aca0 m_subtitles
+            type      0x32acac @"substView"
+            alignment 2
+            size      4
+            offset    0x348d78 12
+            name      0x32acb9 isMoviePlaying
+            type      0x3269b4 C
+            alignment 0
+            size      1
+            offset    0x348d7c 13
+            name      0x32acca m_isFlipped
+            type      0x3269b4 C
+            alignment 0
+            size      1
+        weakIvarLayout 0x0
+        baseProperties 0x0
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348cbc
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x32add5 MoviePlayer
+        baseMethods    0x0
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f44 0x347d28
+    isa        0x347d14
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348d48
+        flags          0x0
+        instanceStart  128
+        instanceSize   128
+        ivarLayout     0x0
+        name           0x32ade1 MoviePlayerViewController
+        baseMethods    0x348d0c
+            entsize 12
+            count   1
+            name    0x32835f shouldAutorotateToInterfaceOrientation:
+            types   0x328387 c12@0:4i8
+            imp     0x215690
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348d20
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x32ade1 MoviePlayerViewController
+        baseMethods    0x0
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f48 0x347d50
+    isa        0x347d3c
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348e54
+        flags          0x0
+        instanceStart  4
+        instanceSize   12
+        ivarLayout     0x0
+        name           0x32c9d5 igphtmlAppDelegate
+        baseMethods    0x348db0
+            entsize 12
+            count   7
+            name    0x32c951 setWindow:
+            types   0x32ad5c v12@0:4@8
+            imp     0x246f50
+            name    0x32c922 window
+            types   0x3312d8 @8@0:4
+            imp     0x246e00
+            name    0x32c95c setViewController:
+            types   0x32ad5c v12@0:4@8
+            imp     0x246f90
+            name    0x32c929 viewController
+            types   0x3312d8 @8@0:4
+            imp     0x246de0
+            name    0x32795c applicationWillEnterForeground:
+            types   0x32ad5c v12@0:4@8
+            imp     0x246e20
+            name    0x32830c dealloc
+            types   0x3282a4 v8@0:4
+            imp     0x246ed0
+            name    0x32c96f applicationDidFinishLaunching:
+            types   0x32ad5c v12@0:4@8
+            imp     0x246e50
+        baseProtocols  0x348e24
+            count    1
+            list[0]  0x34a874
+                isa       0x0
+                name      0x32cc43 UIApplicationDelegate
+                protocols 0x348f7c
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x348e84
+                    entsize 12
+                    count   20
+                    name    0x32c9e8 applicationProtectedDataDidBecomeAvailable:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32ca14 applicationProtectedDataWillBecomeUnavailable:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32795c applicationWillEnterForeground:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32797c applicationDidEnterBackground:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32ca43 application:didReceiveLocalNotification:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32ca6c application:didReceiveRemoteNotification:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32ca96 application:didFailToRegisterForRemoteNotificationsWithError:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32cad4 application:didRegisterForRemoteNotificationsWithDeviceToken:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32cb12 application:didChangeStatusBarFrame:
+                    types   0x32cb37 v28@0:4@8{CGRect={CGPoint=ff}{CGSize=ff}}12
+                    imp     0x0
+                    name    0x32cb63 application:willChangeStatusBarFrame:
+                    types   0x32cb37 v28@0:4@8{CGRect={CGPoint=ff}{CGSize=ff}}12
+                    imp     0x0
+                    name    0x32cb89 application:didChangeStatusBarOrientation:
+                    types   0x32cbb4 v16@0:4@8i12
+                    imp     0x0
+                    name    0x32cbc1 application:willChangeStatusBarOrientation:duration:
+                    types   0x32cbf6 v24@0:4@8i12d16
+                    imp     0x0
+                    name    0x32cc06 applicationSignificantTimeChange:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x3279e9 applicationWillTerminate:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32792d applicationDidReceiveMemoryWarning:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32cc28 application:handleOpenURL:
+                    types   0x327a2e c16@0:4@8@12
+                    imp     0x0
+                    name    0x3279cc applicationWillResignActive:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x3279b0 applicationDidBecomeActive:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x327a03 application:didFinishLaunchingWithOptions:
+                    types   0x327a2e c16@0:4@8@12
+                    imp     0x0
+                    name    0x32c96f applicationDidFinishLaunching:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x348d80
+            entsize   20
+            count     2
+            offset    0x348e80 4
+            name      0x32c922 window
+            type      0x3277e0 @"UIWindow"
+            alignment 2
+            size      4
+            offset    0x348e7c 8
+            name      0x32c929 viewController
+            type      0x32c938 @"igphtmlViewController"
+            alignment 2
+            size      4
+        weakIvarLayout 0x0
+        baseProperties 0x348e0c
+            entsize    8
+            count      2
+            name       0x32c929 viewController
+            attributes 0x32c98e T@"igphtmlViewController",&,N,VviewController
+            name       0x32c922 window
+            attributes 0x32c9bc T@"UIWindow",&,N,Vwindow
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x348e2c
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x32c9d5 igphtmlAppDelegate
+        baseMethods    0x0
+        baseProtocols  0x348e24
+            count    1
+            list[0]  0x34a874
+                isa       0x0
+                name      0x32cc43 UIApplicationDelegate
+                protocols 0x348f7c
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x348e84
+                    entsize 12
+                    count   20
+                    name    0x32c9e8 applicationProtectedDataDidBecomeAvailable:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32ca14 applicationProtectedDataWillBecomeUnavailable:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32795c applicationWillEnterForeground:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32797c applicationDidEnterBackground:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32ca43 application:didReceiveLocalNotification:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32ca6c application:didReceiveRemoteNotification:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32ca96 application:didFailToRegisterForRemoteNotificationsWithError:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32cad4 application:didRegisterForRemoteNotificationsWithDeviceToken:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32cb12 application:didChangeStatusBarFrame:
+                    types   0x32cb37 v28@0:4@8{CGRect={CGPoint=ff}{CGSize=ff}}12
+                    imp     0x0
+                    name    0x32cb63 application:willChangeStatusBarFrame:
+                    types   0x32cb37 v28@0:4@8{CGRect={CGPoint=ff}{CGSize=ff}}12
+                    imp     0x0
+                    name    0x32cb89 application:didChangeStatusBarOrientation:
+                    types   0x32cbb4 v16@0:4@8i12
+                    imp     0x0
+                    name    0x32cbc1 application:willChangeStatusBarOrientation:duration:
+                    types   0x32cbf6 v24@0:4@8i12d16
+                    imp     0x0
+                    name    0x32cc06 applicationSignificantTimeChange:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x3279e9 applicationWillTerminate:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32792d applicationDidReceiveMemoryWarning:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32cc28 application:handleOpenURL:
+                    types   0x327a2e c16@0:4@8@12
+                    imp     0x0
+                    name    0x3279cc applicationWillResignActive:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x3279b0 applicationDidBecomeActive:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x327a03 application:didFinishLaunchingWithOptions:
+                    types   0x327a2e c16@0:4@8@12
+                    imp     0x0
+                    name    0x32c96f applicationDidFinishLaunching:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f4c 0x347d78
+    isa        0x347d64
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349604
+        flags          0x0
+        instanceStart  124
+        instanceSize   540954
+        ivarLayout     0x0
+        name           0x32de2a igphtmlViewController
+        baseMethods    0x3492e8
+            entsize 12
+            count   56
+            name    0x32d8ca setAddressBar:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24c2a0
+            name    0x32d564 addressBar
+            types   0x3312d8 @8@0:4
+            imp     0x2470e0
+            name    0x32d8da setActivityIndicator:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24c2e0
+            name    0x32d57e activityIndicator
+            types   0x3312d8 @8@0:4
+            imp     0x2470c0
+            name    0x32d8f0 setCopyResToDocumentsFolderIndicator:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24c320
+            name    0x32d5ab copyResToDocumentsFolderIndicator
+            types   0x3312d8 @8@0:4
+            imp     0x2470a0
+            name    0x32d916 setM_backButton:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24c360
+            name    0x32d5cd m_backButton
+            types   0x3312d8 @8@0:4
+            imp     0x247080
+            name    0x32d927 setIgphtml_timer:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24c3a0
+            name    0x32dd40 igphtml_timer
+            types   0x3312d8 @8@0:4
+            imp     0x247060
+            name    0x32d939 setUpdate_end_timer:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24c3e0
+            name    0x32d69b update_end_timer
+            types   0x3312d8 @8@0:4
+            imp     0x247040
+            name    0x32d94e setCheck_low_network_timer:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24c420
+            name    0x32dcdc check_low_network_timer
+            types   0x3312d8 @8@0:4
+            imp     0x247020
+            name    0x32d96a makeDir::
+            types   0x327868 v16@0:4@8@12
+            imp     0x2481c0
+            name    0x32d975 makeDirWithPath:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247100
+            name    0x32d986 downloadResFromURL::
+            types   0x327868 v16@0:4@8@12
+            imp     0x247150
+            name    0x32d99b downloadFileWithName::::
+            types   0x32d9b4 v24@0:4@8@12@16B20
+            imp     0x2472a0
+            name    0x32d9c7 gameWasDownloaded:
+            types   0x327db8 c12@0:4@8
+            imp     0x2473f0
+            name    0x32d9dc downloadGameFree:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2494d0
+            name    0x32d9ee downloadGamePaid:
+            types   0x32ad5c v12@0:4@8
+            imp     0x249630
+            name    0x32da00 parseResponse:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24b0d0
+            name    0x32da0f makeHTMLFromBoundle:
+            types   0x32ad5c v12@0:4@8
+            imp     0x249f00
+            name    0x32da24 readHeader:::
+            types   0x32da32 i20@0:4i8c12i16
+            imp     0x248290
+            name    0x32da42 connectionDidFinishLoading:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247010
+            name    0x32da5e connection:didReceiveData:
+            types   0x327868 v16@0:4@8@12
+            imp     0x2474a0
+            name    0x32da79 saveAllResToDocumentsFolder
+            types   0x3282a4 v8@0:4
+            imp     0x249840
+            name    0x32da98 getDefaultDocumentsPath
+            types   0x3282a4 v8@0:4
+            imp     0x249c20
+            name    0x32dab0 checkForNetworkAvailability
+            types   0x32dacc i8@0:4
+            imp     0x249420
+            name    0x32dad3 getUpdateLinkAddress
+            types   0x3282a4 v8@0:4
+            imp     0x248a50
+            name    0x32dae8 getIgpHtmlLink
+            types   0x3282a4 v8@0:4
+            imp     0x24c5c0
+            name    0x32daf7 quitIgpHtml
+            types   0x3282a4 v8@0:4
+            imp     0x248650
+            name    0x32db03 createMMButtons
+            types   0x3282a4 v8@0:4
+            imp     0x24c880
+            name    0x32db13 removeAllWidgetsFromSuperview
+            types   0x3282a4 v8@0:4
+            imp     0x2474d0
+            name    0x32db31 netErrorMethod:
+            types   0x32ad5c v12@0:4@8
+            imp     0x248780
+            name    0x32db41 webView:didFailWithError:
+            types   0x327868 v16@0:4@8@12
+            imp     0x2488a0
+            name    0x32db5b webViewDidFinishLoad:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2475d0
+            name    0x32db71 webViewDidStartLoad:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247810
+            name    0x32db86 findButtonInView:
+            types   0x32db98 @12@0:4@8
+            imp     0x249090
+            name    0x32dba2 gotoAddress:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247870
+            name    0x32dbaf goForward:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247930
+            name    0x32dbba goBack:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247960
+            name    0x32dbc2 webView:shouldStartLoadWithRequest:navigationType:
+            types   0x32dbf5 c20@0:4@8@12I16
+            imp     0x247990
+            name    0x32dc05 viewDidAppear
+            types   0x3282a4 v8@0:4
+            imp     0x248fa0
+            name    0x32dc13 startUpdateHTML
+            types   0x3282a4 v8@0:4
+            imp     0x248920
+            name    0x32dc23 keyboardWillHide:
+            types   0x32ad5c v12@0:4@8
+            imp     0x246ff0
+            name    0x32dc35 keyboardWillShow:
+            types   0x32ad5c v12@0:4@8
+            imp     0x246fd0
+            name    0x32dc47 startIgpHtml
+            types   0x3282a4 v8@0:4
+            imp     0x24ce20
+            name    0x32dc54 verifySaveDone:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247cd0
+            name    0x32dc64 verifyUpdateDesignEnded:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247d70
+            name    0x32dc7d setNetworkToLoConnectionStatus:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247e60
+            name    0x327bf4 startIgpHtmlWithLanguage:
+            types   0x32dc9f v12@0:4i8
+            imp     0x24d840
+            name    0x32dca9 startIgpHtmlUsingMMButton:
+            types   0x32ad5c v12@0:4@8
+            imp     0x247ef0
+            name    0x32dcc4 igpHtmlInit
+            types   0x3282a4 v8@0:4
+            imp     0x247fe0
+            name    0x32dcd0 loadView
+            types   0x3282a4 v8@0:4
+            imp     0x24c650
+            name    0x327c0f refreshWebView
+            types   0x3282a4 v8@0:4
+            imp     0x248cd0
+        baseProtocols  0x3495d0
+            count    2
+            list[0]  0x34a8c0
+                isa       0x0
+                name      0x32e36f UIWebViewDelegate
+                protocols 0x349710
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x3496d8
+                    entsize 12
+                    count   4
+                    name    0x32e351 webView:didFailLoadWithError:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32db5b webViewDidFinishLoad:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32db71 webViewDidStartLoad:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32dbc2 webView:shouldStartLoadWithRequest:navigationType:
+                    types   0x32dbf5 c20@0:4@8@12I16
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+            list[1]  0x34a8e8
+                isa       0x0
+                name      0x32e464 UITextViewDelegate
+                protocols 0x349774
+                    count    2
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                    list[1]  0x34a910
+                        isa       0x0
+                        name      0x32e607 UIScrollViewDelegate
+                        protocols 0x349818
+                            count    1
+                            list[0]  0x34a75c
+                                isa       0x0
+                                name      0x33135c NSObject
+                                protocols 0x0
+                                instanceMethods 0x348568
+                                    entsize 12
+                                    count   19
+                                    name    0x32e61c description
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x32e628 retainCount
+                                    types   0x328148 I8@0:4
+                                    imp     0x0
+                                    name    0x32df18 autorelease
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x32eb58 release
+                                    types   0x327d92 Vv8@0:4
+                                    imp     0x0
+                                    name    0x3352d0 retain
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x3284a6 respondsToSelector:
+                                    types   0x327d9a c12@0:4:8
+                                    imp     0x0
+                                    name    0x327da4 conformsToProtocol:
+                                    types   0x327db8 c12@0:4@8
+                                    imp     0x0
+                                    name    0x327dc2 isMemberOfClass:
+                                    types   0x3312e0 c12@0:4#8
+                                    imp     0x0
+                                    name    0x3312ea isKindOfClass:
+                                    types   0x3312e0 c12@0:4#8
+                                    imp     0x0
+                                    name    0x327dd4 isProxy
+                                    types   0x327ddc c8@0:4
+                                    imp     0x0
+                                    name    0x3312fc performSelector:withObject:withObject:
+                                    types   0x32e634 @20@0:4:8@12@16
+                                    imp     0x0
+                                    name    0x32e644 performSelector:withObject:
+                                    types   0x32e660 @16@0:4:8@12
+                                    imp     0x0
+                                    name    0x331324 performSelector:
+                                    types   0x327de4 @12@0:4:8
+                                    imp     0x0
+                                    name    0x32e670 zone
+                                    types   0x331338 ^{_NSZone=}8@0:4
+                                    imp     0x0
+                                    name    0x327df0 self
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x3284e0 class
+                                    types   0x33134c #8@0:4
+                                    imp     0x0
+                                    name    0x327df6 superclass
+                                    types   0x33134c #8@0:4
+                                    imp     0x0
+                                    name    0x331356 hash
+                                    types   0x328148 I8@0:4
+                                    imp     0x0
+                                    name    0x327e02 isEqual:
+                                    types   0x327db8 c12@0:4@8
+                                    imp     0x0
+                                classMethods 0x0
+                                optionalInstanceMethods 0x0
+                                optionalClassMethods 0x0
+                                instanceProperties 0x0
+                        instanceMethods 0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x349780
+                            entsize 12
+                            count   12
+                            name    0x32e477 scrollViewDidScrollToTop:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e491 scrollViewShouldScrollToTop:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x32e4ae scrollViewDidEndZooming:withView:atScale:
+                            types   0x32e4d8 v20@0:4@8@12f16
+                            imp     0x0
+                            name    0x32e4e8 scrollViewWillBeginZooming:withView:
+                            types   0x327868 v16@0:4@8@12
+                            imp     0x0
+                            name    0x32e50d viewForZoomingInScrollView:
+                            types   0x32db98 @12@0:4@8
+                            imp     0x0
+                            name    0x32e529 scrollViewDidEndScrollingAnimation:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e54d scrollViewDidEndDecelerating:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e56b scrollViewWillBeginDecelerating:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e58c scrollViewDidEndDragging:willDecelerate:
+                            types   0x32e5b5 v16@0:4@8c12
+                            imp     0x0
+                            name    0x32e5c2 scrollViewWillBeginDragging:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e5df scrollViewDidZoom:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e5f2 scrollViewDidScroll:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x349718
+                    entsize 12
+                    count   7
+                    name    0x32e381 textViewDidChangeSelection:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e39d textViewDidChange:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e3b0 textView:shouldChangeTextInRange:replacementText:
+                    types   0x32e3e2 c24@0:4@8{_NSRange=II}12@20
+                    imp     0x0
+                    name    0x32e3fe textViewDidEndEditing:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e415 textViewDidBeginEditing:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e42e textViewShouldEndEditing:
+                    types   0x327db8 c12@0:4@8
+                    imp     0x0
+                    name    0x32e448 textViewShouldBeginEditing:
+                    types   0x327db8 c12@0:4@8
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x348f84
+            entsize   20
+            count     43
+            offset    0x349644 124
+            name      0x32d564 addressBar
+            type      0x32d56f @"UITextField"
+            alignment 2
+            size      4
+            offset    0x349640 128
+            name      0x32d57e activityIndicator
+            type      0x32d590 @"UIActivityIndicatorView"
+            alignment 2
+            size      4
+            offset    0x34963c 132
+            name      0x32d5ab copyResToDocumentsFolderIndicator
+            type      0x32d590 @"UIActivityIndicatorView"
+            alignment 2
+            size      4
+            offset    0x349638 136
+            name      0x32d5cd m_backButton
+            type      0x32d5da @"UIButton"
+            alignment 2
+            size      4
+            offset    0x349648 140
+            name      0x32d5e6 lang_buttons
+            type      0x32d5f3 [6@"UIButton"]
+            alignment 2
+            size      24
+            offset    0x34964c 164
+            name      0x32d602 m_imgBlack
+            type      0x32d60d @"UIImage"
+            alignment 2
+            size      4
+            offset    0x349650 168
+            name      0x32d618 m_imgBlackView
+            type      0x32d627 @"UIImageView"
+            alignment 2
+            size      4
+            offset    0x349654 172
+            name      0x32d636 m_updateDesignLabel
+            type      0x32d64a @"UILabel"
+            alignment 2
+            size      4
+            offset    0x349658 176
+            name      0x32d655 b_is_in_mm
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x34965c 177
+            name      0x32d662 connection_was_ok
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x349660 178
+            name      0x32d674 keyboard_is_shown
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x349664 180
+            name      0x32d686 m_subVC
+            type      0x32ac8c @"UIViewController"
+            alignment 2
+            size      4
+            offset    0x349634 184
+            name      0x32dd40 igphtml_timer
+            type      0x32d690 @"NSTimer"
+            alignment 2
+            size      4
+            offset    0x349630 188
+            name      0x32d69b update_end_timer
+            type      0x32d690 @"NSTimer"
+            alignment 2
+            size      4
+            offset    0x349668 192
+            name      0x32d6ac b_update_done
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x34966c 196
+            name      0x32d6bc kbd_notification
+            type      0x32d6cd @"NSNotificationCenter"
+            alignment 2
+            size      4
+            offset    0x349670 200
+            name      0x32d6e5 defaultDocumentsPath
+            type      0x32d6fa @"NSString"
+            alignment 2
+            size      4
+            offset    0x349674 204
+            name      0x32d706 device_firmware
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x349678 208
+            name      0x32d716 b_thread_done
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x34967c 209
+            name      0x32d724 finish_bundle_copy
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x349680 212
+            name      0x32d737 _gamelanguage
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x349684 216
+            name      0x32d745 b_running_first_time
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x349688 220
+            name      0x32d75a webview_load_times
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x34968c 224
+            name      0x32d76d updateLinkAddress
+            type      0x32d6fa @"NSString"
+            alignment 2
+            size      4
+            offset    0x349690 228
+            name      0x32d77f downloadResponse
+            type      0x32d790 @"NSURLResponse"
+            alignment 2
+            size      4
+            offset    0x349694 232
+            name      0x32780d receivedData
+            type      0x32781a @"NSMutableData"
+            alignment 2
+            size      4
+            offset    0x349698 236
+            name      0x32d7a3 ns_response_update
+            type      0x32d6fa @"NSString"
+            alignment 2
+            size      4
+            offset    0x34969c 240
+            name      0x331d10 response
+            type      0x33306c *
+            alignment 2
+            size      4
+            offset    0x3496a0 244
+            name      0x32d7b9 filenameHTML_NEW_DESIGN
+            type      0x32d7d1 [1024[256c]]
+            alignment 0
+            size      262144
+            offset    0x3496a4 262388
+            name      0x32d7de no_filenameHTML_NEW_DESIGN
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x3496a8 262392
+            name      0x32d7f9 no_filenameHTML
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x3496ac 262396
+            name      0x32d809 filenameHTML
+            type      0x32d7d1 [1024[256c]]
+            alignment 0
+            size      262144
+            offset    0x3496b0 524540
+            name      0x32d816 no_paidGames
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x3496b4 524544
+            name      0x32d823 filenamePaid
+            type      0x32d830 [1024[8c]]
+            alignment 0
+            size      8192
+            offset    0x3496b8 532736
+            name      0x32d83b no_freeGames
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x3496bc 532740
+            name      0x32d848 filenameFree
+            type      0x32d830 [1024[8c]]
+            alignment 0
+            size      8192
+            offset    0x3496c0 540932
+            name      0x32d855 versionHTML
+            type      0x32d6fa @"NSString"
+            alignment 2
+            size      4
+            offset    0x3496c4 540936
+            name      0x32d861 b_dversion_must_be_read_from_bundle
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x3496c8 540940
+            name      0x32d885 network_status
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x3496cc 540944
+            name      0x32d894 b_low_network_connection
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x34962c 540948
+            name      0x32dcdc check_low_network_timer
+            type      0x32d690 @"NSTimer"
+            alignment 2
+            size      4
+            offset    0x3496d0 540952
+            name      0x32d8ad b_dont_parse
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x3496d4 540953
+            name      0x32d8ba b_igp_is_active
+            type      0x3269b0 B
+            alignment 0
+            size      1
+        weakIvarLayout 0x0
+        baseProperties 0x349590
+            entsize    8
+            count      7
+            name       0x32dcdc check_low_network_timer
+            attributes 0x32dcf4 T@"NSTimer",&,N,Vcheck_low_network_timer
+            name       0x32d69b update_end_timer
+            attributes 0x32dd1e T@"NSTimer",&,N,Vupdate_end_timer
+            name       0x32dd40 igphtml_timer
+            attributes 0x32dd4e T@"NSTimer",&,N,Vigphtml_timer
+            name       0x32d5cd m_backButton
+            attributes 0x32dd6e T@"UIButton",&,N,Vm_backButton
+            name       0x32d5ab copyResToDocumentsFolderIndicator
+            attributes 0x32dd8f T@"UIActivityIndicatorView",&,N,VcopyResToDocumentsFolderIndicator
+            name       0x32d57e activityIndicator
+            attributes 0x32ddd4 T@"UIActivityIndicatorView",&,N,VactivityIndicator
+            name       0x32d564 addressBar
+            attributes 0x32de0a T@"UITextField",&,N,VaddressBar
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x3495dc
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x32de2a igphtmlViewController
+        baseMethods    0x0
+        baseProtocols  0x3495d0
+            count    2
+            list[0]  0x34a8c0
+                isa       0x0
+                name      0x32e36f UIWebViewDelegate
+                protocols 0x349710
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x3496d8
+                    entsize 12
+                    count   4
+                    name    0x32e351 webView:didFailLoadWithError:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x32db5b webViewDidFinishLoad:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32db71 webViewDidStartLoad:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32dbc2 webView:shouldStartLoadWithRequest:navigationType:
+                    types   0x32dbf5 c20@0:4@8@12I16
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+            list[1]  0x34a8e8
+                isa       0x0
+                name      0x32e464 UITextViewDelegate
+                protocols 0x349774
+                    count    2
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                    list[1]  0x34a910
+                        isa       0x0
+                        name      0x32e607 UIScrollViewDelegate
+                        protocols 0x349818
+                            count    1
+                            list[0]  0x34a75c
+                                isa       0x0
+                                name      0x33135c NSObject
+                                protocols 0x0
+                                instanceMethods 0x348568
+                                    entsize 12
+                                    count   19
+                                    name    0x32e61c description
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x32e628 retainCount
+                                    types   0x328148 I8@0:4
+                                    imp     0x0
+                                    name    0x32df18 autorelease
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x32eb58 release
+                                    types   0x327d92 Vv8@0:4
+                                    imp     0x0
+                                    name    0x3352d0 retain
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x3284a6 respondsToSelector:
+                                    types   0x327d9a c12@0:4:8
+                                    imp     0x0
+                                    name    0x327da4 conformsToProtocol:
+                                    types   0x327db8 c12@0:4@8
+                                    imp     0x0
+                                    name    0x327dc2 isMemberOfClass:
+                                    types   0x3312e0 c12@0:4#8
+                                    imp     0x0
+                                    name    0x3312ea isKindOfClass:
+                                    types   0x3312e0 c12@0:4#8
+                                    imp     0x0
+                                    name    0x327dd4 isProxy
+                                    types   0x327ddc c8@0:4
+                                    imp     0x0
+                                    name    0x3312fc performSelector:withObject:withObject:
+                                    types   0x32e634 @20@0:4:8@12@16
+                                    imp     0x0
+                                    name    0x32e644 performSelector:withObject:
+                                    types   0x32e660 @16@0:4:8@12
+                                    imp     0x0
+                                    name    0x331324 performSelector:
+                                    types   0x327de4 @12@0:4:8
+                                    imp     0x0
+                                    name    0x32e670 zone
+                                    types   0x331338 ^{_NSZone=}8@0:4
+                                    imp     0x0
+                                    name    0x327df0 self
+                                    types   0x3312d8 @8@0:4
+                                    imp     0x0
+                                    name    0x3284e0 class
+                                    types   0x33134c #8@0:4
+                                    imp     0x0
+                                    name    0x327df6 superclass
+                                    types   0x33134c #8@0:4
+                                    imp     0x0
+                                    name    0x331356 hash
+                                    types   0x328148 I8@0:4
+                                    imp     0x0
+                                    name    0x327e02 isEqual:
+                                    types   0x327db8 c12@0:4@8
+                                    imp     0x0
+                                classMethods 0x0
+                                optionalInstanceMethods 0x0
+                                optionalClassMethods 0x0
+                                instanceProperties 0x0
+                        instanceMethods 0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x349780
+                            entsize 12
+                            count   12
+                            name    0x32e477 scrollViewDidScrollToTop:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e491 scrollViewShouldScrollToTop:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x32e4ae scrollViewDidEndZooming:withView:atScale:
+                            types   0x32e4d8 v20@0:4@8@12f16
+                            imp     0x0
+                            name    0x32e4e8 scrollViewWillBeginZooming:withView:
+                            types   0x327868 v16@0:4@8@12
+                            imp     0x0
+                            name    0x32e50d viewForZoomingInScrollView:
+                            types   0x32db98 @12@0:4@8
+                            imp     0x0
+                            name    0x32e529 scrollViewDidEndScrollingAnimation:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e54d scrollViewDidEndDecelerating:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e56b scrollViewWillBeginDecelerating:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e58c scrollViewDidEndDragging:willDecelerate:
+                            types   0x32e5b5 v16@0:4@8c12
+                            imp     0x0
+                            name    0x32e5c2 scrollViewWillBeginDragging:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e5df scrollViewDidZoom:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                            name    0x32e5f2 scrollViewDidScroll:
+                            types   0x32ad5c v12@0:4@8
+                            imp     0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x349718
+                    entsize 12
+                    count   7
+                    name    0x32e381 textViewDidChangeSelection:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e39d textViewDidChange:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e3b0 textView:shouldChangeTextInRange:replacementText:
+                    types   0x32e3e2 c24@0:4@8{_NSRange=II}12@20
+                    imp     0x0
+                    name    0x32e3fe textViewDidEndEditing:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e415 textViewDidBeginEditing:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x32e42e textViewShouldEndEditing:
+                    types   0x327db8 c12@0:4@8
+                    imp     0x0
+                    name    0x32e448 textViewShouldBeginEditing:
+                    types   0x327db8 c12@0:4@8
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f50 0x347da0
+    isa        0x347d8c
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349868
+        flags          0x0
+        instanceStart  4
+        instanceSize   4
+        ivarLayout     0x0
+        name           0x32e7e2 sendInfoInterface
+        baseMethods    0x0
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349840
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x32e7e2 sendInfoInterface
+        baseMethods    0x349820
+            entsize 12
+            count   2
+            name    0x32e7cb sendInfo
+            types   0x3282a4 v8@0:4
+            imp     0x24db70
+            name    0x327be1 IGPSendGameInfo::
+            types   0x32e7d5 v16@0:4i8*12
+            imp     0x24ddd0
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f54 0x347dc8
+    isa        0x347db4
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349a08
+        flags          0x0
+        instanceStart  44
+        instanceSize   65
+        ivarLayout     0x0
+        name           0x32ea70 substView
+        baseMethods    0x349918
+            entsize 12
+            count   14
+            name    0x32e965 setM_btnSkip:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24eaf0
+            name    0x32ea4a m_btnSkip
+            types   0x3312d8 @8@0:4
+            imp     0x24e4f0
+            name    0x32e974 setM_btnSubtitles:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24eb30
+            name    0x32e92e m_btnSubtitles
+            types   0x3312d8 @8@0:4
+            imp     0x24e4d0
+            name    0x3281c2 touchesBegan:withEvent:
+            types   0x327868 v16@0:4@8@12
+            imp     0x24e520
+            name    0x32830c dealloc
+            types   0x3282a4 v8@0:4
+            imp     0x24ea00
+            name    0x32e987 FadebuttonOnTime:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24e670
+            name    0x32e999 ActivateSkip:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24e4b0
+            name    0x32e9a7 SetSubstText:
+            types   0x32ad5c v12@0:4@8
+            imp     0x24e820
+            name    0x32e9b5 drawRect:
+            types   0x32e9bf v24@0:4{CGRect={CGPoint=ff}{CGSize=ff}}8
+            imp     0x24e4a0
+            name    0x327d44 initWithFrame:
+            types   0x328317 @24@0:4{CGRect={CGPoint=ff}{CGSize=ff}}8
+            imp     0x24eb70
+            name    0x32e9e8 HideSubtitle
+            types   0x3282a4 v8@0:4
+            imp     0x24e880
+            name    0x32e9f5 BtnTapped_Subtitles:event:
+            types   0x327868 v16@0:4@8@12
+            imp     0x24e920
+            name    0x32ea10 BtnTapped_Skip:event:
+            types   0x327868 v16@0:4@8@12
+            imp     0x24e510
+        baseProtocols  0x0
+        ivars          0x349898
+            entsize   20
+            count     6
+            offset    0x349a30 44
+            name      0x32e915 m_label
+            type      0x32d64a @"UILabel"
+            alignment 2
+            size      4
+            offset    0x349a34 48
+            name      0x32e920 m_shadowLabel
+            type      0x32d64a @"UILabel"
+            alignment 2
+            size      4
+            offset    0x349890 52
+            name      0x32e92e m_btnSubtitles
+            type      0x32d5da @"UIButton"
+            alignment 2
+            size      4
+            offset    0x349894 56
+            name      0x32ea4a m_btnSkip
+            type      0x32d5da @"UIButton"
+            alignment 2
+            size      4
+            offset    0x349a38 60
+            name      0x32e93f m_btnsTimeBeforeFade
+            type      0x32b124 f
+            alignment 2
+            size      4
+            offset    0x349a3c 64
+            name      0x32e956 m_enableSkip
+            type      0x3269b0 B
+            alignment 0
+            size      1
+        weakIvarLayout 0x0
+        baseProperties 0x3499c8
+            entsize    8
+            count      2
+            name       0x32e92e m_btnSubtitles
+            attributes 0x32ea29 T@"UIButton",&,N,Vm_btnSubtitles
+            name       0x32ea4a m_btnSkip
+            attributes 0x32ea54 T@"UIButton",&,N,Vm_btnSkip
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x3499e0
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x32ea70 substView
+        baseMethods    0x0
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f58 0x347df0
+    isa        0x347ddc
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349c34
+        flags          0x0
+        instanceStart  168
+        instanceSize   204
+        ivarLayout     0x0
+        name           0x330c71 GLLiveViewController
+        baseMethods    0x349b18
+            entsize 12
+            count   16
+            name    0x330b95 setTextView:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2820a8
+            name    0x330b31 textView
+            types   0x3312d8 @8@0:4
+            imp     0x2816dc
+            name    0x330ba2 setTextField:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2820dc
+            name    0x330b48 textField
+            types   0x3312d8 @8@0:4
+            imp     0x2816c8
+            name    0x32830c dealloc
+            types   0x3282a4 v8@0:4
+            imp     0x28195c
+            name    0x32f523 endInput
+            types   0x3282a4 v8@0:4
+            imp     0x2816f0
+            name    0x32f50c clickOK
+            types   0x3282a4 v8@0:4
+            imp     0x281c08
+            name    0x32f502 clickBack
+            types   0x3282a4 v8@0:4
+            imp     0x28186c
+            name    0x32f514 onRotateDevice
+            types   0x3282a4 v8@0:4
+            imp     0x282a78
+            name    0x32e415 textViewDidBeginEditing:
+            types   0x32ad5c v12@0:4@8
+            imp     0x281914
+            name    0x330bb0 textFieldDidBeginEditing:
+            types   0x32ad5c v12@0:4@8
+            imp     0x281938
+            name    0x330bca textFieldShouldReturn:
+            types   0x327db8 c12@0:4@8
+            imp     0x281f10
+            name    0x32e3b0 textView:shouldChangeTextInRange:replacementText:
+            types   0x32e3e2 c24@0:4@8{_NSRange=II}12@20
+            imp     0x281ae0
+            name    0x330be1 textField:shouldChangeCharactersInRange:replacementString:
+            types   0x32e3e2 c24@0:4@8{_NSRange=II}12@20
+            imp     0x281b74
+            name    0x32f562 myInit
+            types   0x3282a4 v8@0:4
+            imp     0x282110
+            name    0x32f569 init:LengthOfText:IsView:IsPwd:Width:HMiddle:
+            types   0x330c1c @32@0:4*8i12c16c20i24i28
+            imp     0x281998
+        baseProtocols  0x349bf8
+            count    4
+            list[0]  0x0 ___cxa_pure_virtual
+            list[1]  0x0 ___cxa_pure_virtual
+            list[2]  0x0 ___cxa_pure_virtual
+            list[3]  0x0 ___cxa_pure_virtual
+        ivars          0x349a48
+            entsize   20
+            count     10
+            offset    0x349c5c 168
+            name      0x32d686 m_subVC
+            type      0x32ac8c @"UIViewController"
+            alignment 2
+            size      4
+            offset    0x349a40 172
+            name      0x330b31 textView
+            type      0x330b3a @"UITextView"
+            alignment 2
+            size      4
+            offset    0x349a44 176
+            name      0x330b48 textField
+            type      0x32d56f @"UITextField"
+            alignment 2
+            size      4
+            offset    0x349c60 180
+            name      0x330b52 m_view
+            type      0x330b59 @"UIView"
+            alignment 2
+            size      4
+            offset    0x349c64 184
+            name      0x330b63 m_text
+            type      0x33306c *
+            alignment 2
+            size      4
+            offset    0x349c68 188
+            name      0x330b6a m_maxlen
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x349c6c 192
+            name      0x330b73 m_isView
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x349c70 193
+            name      0x330b7c m_isPwd
+            type      0x3269b0 B
+            alignment 0
+            size      1
+            offset    0x349c74 196
+            name      0x330b84 m_width
+            type      0x32d6ba i
+            alignment 2
+            size      4
+            offset    0x349c78 200
+            name      0x330b8c m_middle
+            type      0x32d6ba i
+            alignment 2
+            size      4
+        weakIvarLayout 0x0
+        baseProperties 0x0 ___cxa_pure_virtual
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349c0c
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x330c71 GLLiveViewController
+        baseMethods    0x0
+        baseProtocols  0x349bf8
+            count    4
+            list[0]  0x0 ___cxa_pure_virtual
+            list[1]  0x0 ___cxa_pure_virtual
+            list[2]  0x0 ___cxa_pure_virtual
+            list[3]  0x0 ___cxa_pure_virtual
+        ivars          0x0 ___cxa_pure_virtual
+        weakIvarLayout 0x0 ___cxa_pure_virtual
+        baseProperties 0x0
+00349f5c 0x347e18
+    isa        0x347e04
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349db8
+        flags          0x0
+        instanceStart  4
+        instanceSize   4
+        ivarLayout     0x0
+        name           0x331113 GLLiveUtil
+        baseMethods    0x0
+        baseProtocols  0x349d88
+            count    1
+            list[0]  0x34ae00
+                isa       0x0
+                name      0x3312b8 UIImagePickerControllerDelegate
+                protocols 0x349e0c
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x349de0
+                    entsize 12
+                    count   3
+                    name    0x33108e imagePickerControllerDidCancel:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x331282 imagePickerController:didFinishPickingMediaWithInfo:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x3310b0 imagePickerController:didFinishPickingImage:editingInfo:
+                    types   0x3310e9 v20@0:4@8@12@16
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349d90
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x331113 GLLiveUtil
+        baseMethods    0x349d38
+            entsize 12
+            count   6
+            name    0x33100b UIImageToPNGBuffer:ppBuf:iLenght:
+            types   0x33102d v20@0:4@8^*12^i16
+            imp     0x285160
+            name    0x33103f UIImageToJPEGBuffer:ppBuf:iLenght:
+            types   0x33102d v20@0:4@8^*12^i16
+            imp     0x2850d0
+            name    0x331062 ResizeImage:iWidth:iHeight:
+            types   0x33107e @20@0:4@8i12i16
+            imp     0x285654
+            name    0x33108e imagePickerControllerDidCancel:
+            types   0x32ad5c v12@0:4@8
+            imp     0x284fcc
+            name    0x3310b0 imagePickerController:didFinishPickingImage:editingInfo:
+            types   0x3310e9 v20@0:4@8@12@16
+            imp     0x28504c
+            name    0x3310f9 startPhotoLibraryPiker:
+            types   0x327db8 c12@0:4@8
+            imp     0x2847b0
+        baseProtocols  0x349d88
+            count    1
+            list[0]  0x34ae00
+                isa       0x0
+                name      0x3312b8 UIImagePickerControllerDelegate
+                protocols 0x349e0c
+                    count    1
+                    list[0]  0x34a75c
+                        isa       0x0
+                        name      0x33135c NSObject
+                        protocols 0x0
+                        instanceMethods 0x348568
+                            entsize 12
+                            count   19
+                            name    0x32e61c description
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32e628 retainCount
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x32df18 autorelease
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x32eb58 release
+                            types   0x327d92 Vv8@0:4
+                            imp     0x0
+                            name    0x3352d0 retain
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284a6 respondsToSelector:
+                            types   0x327d9a c12@0:4:8
+                            imp     0x0
+                            name    0x327da4 conformsToProtocol:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                            name    0x327dc2 isMemberOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x3312ea isKindOfClass:
+                            types   0x3312e0 c12@0:4#8
+                            imp     0x0
+                            name    0x327dd4 isProxy
+                            types   0x327ddc c8@0:4
+                            imp     0x0
+                            name    0x3312fc performSelector:withObject:withObject:
+                            types   0x32e634 @20@0:4:8@12@16
+                            imp     0x0
+                            name    0x32e644 performSelector:withObject:
+                            types   0x32e660 @16@0:4:8@12
+                            imp     0x0
+                            name    0x331324 performSelector:
+                            types   0x327de4 @12@0:4:8
+                            imp     0x0
+                            name    0x32e670 zone
+                            types   0x331338 ^{_NSZone=}8@0:4
+                            imp     0x0
+                            name    0x327df0 self
+                            types   0x3312d8 @8@0:4
+                            imp     0x0
+                            name    0x3284e0 class
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x327df6 superclass
+                            types   0x33134c #8@0:4
+                            imp     0x0
+                            name    0x331356 hash
+                            types   0x328148 I8@0:4
+                            imp     0x0
+                            name    0x327e02 isEqual:
+                            types   0x327db8 c12@0:4@8
+                            imp     0x0
+                        classMethods 0x0
+                        optionalInstanceMethods 0x0
+                        optionalClassMethods 0x0
+                        instanceProperties 0x0
+                instanceMethods 0x0
+                classMethods 0x0
+                optionalInstanceMethods 0x349de0
+                    entsize 12
+                    count   3
+                    name    0x33108e imagePickerControllerDidCancel:
+                    types   0x32ad5c v12@0:4@8
+                    imp     0x0
+                    name    0x331282 imagePickerController:didFinishPickingMediaWithInfo:
+                    types   0x327868 v16@0:4@8@12
+                    imp     0x0
+                    name    0x3310b0 imagePickerController:didFinishPickingImage:editingInfo:
+                    types   0x3310e9 v20@0:4@8@12@16
+                    imp     0x0
+                optionalClassMethods 0x0
+                instanceProperties 0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+00349f60 0x347e40
+    isa        0x347e2c
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349f00
+        flags          0x0
+        instanceStart  4
+        instanceSize   16
+        ivarLayout     0x0
+        name           0x3353cb VoxiPodNotificationHandler
+        baseMethods    0x349e58
+            entsize 12
+            count   10
+            name    0x33537a handle_libraryChanged:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2f58b8
+            name    0x335391 handle_songChanged:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2f584c
+            name    0x3353a5 handle_stateChanged:
+            types   0x32ad5c v12@0:4@8
+            imp     0x2f5928
+            name    0x3352fc setLibraryCallback:
+            types   0x3353ba v12@0:4^?8
+            imp     0x2f5988
+            name    0x335310 setSongCallback:
+            types   0x3353ba v12@0:4^?8
+            imp     0x2f5a68
+            name    0x335321 setStateCallback:
+            types   0x3353ba v12@0:4^?8
+            imp     0x2f5b60
+            name    0x3353c5 reset
+            types   0x3282a4 v8@0:4
+            imp     0x2f5c58
+            name    0x32aeec init
+            types   0x3282a4 v8@0:4
+            imp     0x2f5814
+            name    0x32830c dealloc
+            types   0x3282a4 v8@0:4
+            imp     0x2f5e68
+            name    0x327f20 alloc
+            types   0x3312d8 @8@0:4
+            imp     0x2f5868
+        baseProtocols  0x0
+        ivars          0x349e14
+            entsize   20
+            count     3
+            offset    0x0 ___cxa_pure_virtual
+            name      0x335346 m_stateCallback
+            type      0x335356 ^?
+            alignment 2
+            size      4
+            offset    0x349f2c 8
+            name      0x335359 m_songCallback
+            type      0x335356 ^?
+            alignment 2
+            size      4
+            offset    0x349f30 12
+            name      0x335368 m_libraryCallback
+            type      0x335356 ^?
+            alignment 2
+            size      4
+        weakIvarLayout 0x0
+        baseProperties 0x0
+Meta Class
+    isa        0x0
+    superclass 0x0
+    cache      0x0
+    vtable     0x0
+    data       0x349ed8
+        flags          0x1 RO_META
+        instanceStart  20
+        instanceSize   20
+        ivarLayout     0x0
+        name           0x3353cb VoxiPodNotificationHandler
+        baseMethods    0x0
+        baseProtocols  0x0
+        ivars          0x0
+        weakIvarLayout 0x0
+        baseProperties 0x0
+Contents of (__DATA,__objc_classrefs) section
+00348304 0x0
+00348308 0x347c88
+0034830c 0x0
+00348310 0x0
+00348314 0x0
+00348318 0x347cd8
+0034831c 0x0
+00348320 0x0
+00348324 0x347d78
+00348328 0x347da0
+0034832c 0x0
+00348330 0x0
+00348334 0x0
+00348338 0x0
+0034833c 0x0
+00348340 0x0
+00348344 0x0
+00348348 0x0
+0034834c 0x0
+00348350 0x0
+00348354 0x0
+00348358 0x347cb0
+0034835c 0x0
+00348360 0x0
+00348364 0x0
+00348368 0x0
+0034836c 0x347d28
+00348370 0x0
+00348374 0x347dc8
+00348378 0x347d00
+0034837c 0x0
+00348380 0x0
+00348384 0x0
+00348388 0x0
+0034838c 0x0
+00348390 0x0
+00348394 0x0
+00348398 0x0
+0034839c 0x0
+003483a0 0x0
+003483a4 0x0
+003483a8 0x0
+003483ac 0x0
+003483b0 0x0
+003483b4 0x0
+003483b8 0x0
+003483bc 0x0
+003483c0 0x0
+003483c4 0x347df0
+003483c8 0x0
+003483cc 0x0
+003483d0 0x347e18
+003483d4 0x0
+003483d8 0x0
+003483dc 0x347e40
+003483e0 0x0
+003483e4 0x0
+003483e8 0x0
+Contents of (__DATA,__objc_superrefs) section
+003483ec 0x347c88
+003483f0 0x347cb0
+003483f4 0x347cd8
+003483f8 0x347d00
+003483fc 0x347d50
+00348400 0x347d78
+00348404 0x347dc8
+00348408 0x347df0
+0034840c 0x347e40
+Contents of (__DATA,__objc_protolist) section
+00349f64 0x34a734
+    isa       0x0
+    name      0x327523 UIAccelerometerDelegate
+    protocols 0x348560
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x34854c
+        entsize 12
+        count   1
+        name    0x3274cd accelerometer:didAccelerate:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f68 0x34a75c
+    isa       0x0
+    name      0x33135c NSObject
+    protocols 0x0
+    instanceMethods 0x348568
+        entsize 12
+        count   19
+        name    0x32e61c description
+        types   0x3312d8 @8@0:4
+        imp     0x0
+        name    0x32e628 retainCount
+        types   0x328148 I8@0:4
+        imp     0x0
+        name    0x32df18 autorelease
+        types   0x3312d8 @8@0:4
+        imp     0x0
+        name    0x32eb58 release
+        types   0x327d92 Vv8@0:4
+        imp     0x0
+        name    0x3352d0 retain
+        types   0x3312d8 @8@0:4
+        imp     0x0
+        name    0x3284a6 respondsToSelector:
+        types   0x327d9a c12@0:4:8
+        imp     0x0
+        name    0x327da4 conformsToProtocol:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+        name    0x327dc2 isMemberOfClass:
+        types   0x3312e0 c12@0:4#8
+        imp     0x0
+        name    0x3312ea isKindOfClass:
+        types   0x3312e0 c12@0:4#8
+        imp     0x0
+        name    0x327dd4 isProxy
+        types   0x327ddc c8@0:4
+        imp     0x0
+        name    0x3312fc performSelector:withObject:withObject:
+        types   0x32e634 @20@0:4:8@12@16
+        imp     0x0
+        name    0x32e644 performSelector:withObject:
+        types   0x32e660 @16@0:4:8@12
+        imp     0x0
+        name    0x331324 performSelector:
+        types   0x327de4 @12@0:4:8
+        imp     0x0
+        name    0x32e670 zone
+        types   0x331338 ^{_NSZone=}8@0:4
+        imp     0x0
+        name    0x327df0 self
+        types   0x3312d8 @8@0:4
+        imp     0x0
+        name    0x3284e0 class
+        types   0x33134c #8@0:4
+        imp     0x0
+        name    0x327df6 superclass
+        types   0x33134c #8@0:4
+        imp     0x0
+        name    0x331356 hash
+        types   0x328148 I8@0:4
+        imp     0x0
+        name    0x327e02 isEqual:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f6c 0x34a7ec
+    isa       0x0
+    name      0x327d7e EAGLViewDelegate
+    protocols 0x3488a0
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x34888c
+        entsize 12
+        count   1
+        name    0x327d61 didResizeEAGLSurfaceForView:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f70 0x34a874
+    isa       0x0
+    name      0x32cc43 UIApplicationDelegate
+    protocols 0x348f7c
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x348e84
+        entsize 12
+        count   20
+        name    0x32c9e8 applicationProtectedDataDidBecomeAvailable:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32ca14 applicationProtectedDataWillBecomeUnavailable:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32795c applicationWillEnterForeground:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32797c applicationDidEnterBackground:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32ca43 application:didReceiveLocalNotification:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+        name    0x32ca6c application:didReceiveRemoteNotification:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+        name    0x32ca96 application:didFailToRegisterForRemoteNotificationsWithError:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+        name    0x32cad4 application:didRegisterForRemoteNotificationsWithDeviceToken:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+        name    0x32cb12 application:didChangeStatusBarFrame:
+        types   0x32cb37 v28@0:4@8{CGRect={CGPoint=ff}{CGSize=ff}}12
+        imp     0x0
+        name    0x32cb63 application:willChangeStatusBarFrame:
+        types   0x32cb37 v28@0:4@8{CGRect={CGPoint=ff}{CGSize=ff}}12
+        imp     0x0
+        name    0x32cb89 application:didChangeStatusBarOrientation:
+        types   0x32cbb4 v16@0:4@8i12
+        imp     0x0
+        name    0x32cbc1 application:willChangeStatusBarOrientation:duration:
+        types   0x32cbf6 v24@0:4@8i12d16
+        imp     0x0
+        name    0x32cc06 applicationSignificantTimeChange:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x3279e9 applicationWillTerminate:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32792d applicationDidReceiveMemoryWarning:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32cc28 application:handleOpenURL:
+        types   0x327a2e c16@0:4@8@12
+        imp     0x0
+        name    0x3279cc applicationWillResignActive:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x3279b0 applicationDidBecomeActive:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x327a03 application:didFinishLaunchingWithOptions:
+        types   0x327a2e c16@0:4@8@12
+        imp     0x0
+        name    0x32c96f applicationDidFinishLaunching:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f74 0x34a8c0
+    isa       0x0
+    name      0x32e36f UIWebViewDelegate
+    protocols 0x349710
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x3496d8
+        entsize 12
+        count   4
+        name    0x32e351 webView:didFailLoadWithError:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+        name    0x32db5b webViewDidFinishLoad:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32db71 webViewDidStartLoad:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32dbc2 webView:shouldStartLoadWithRequest:navigationType:
+        types   0x32dbf5 c20@0:4@8@12I16
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f78 0x34a8e8
+    isa       0x0
+    name      0x32e464 UITextViewDelegate
+    protocols 0x349774
+        count    2
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+        list[1]  0x34a910
+            isa       0x0
+            name      0x32e607 UIScrollViewDelegate
+            protocols 0x349818
+                count    1
+                list[0]  0x34a75c
+                    isa       0x0
+                    name      0x33135c NSObject
+                    protocols 0x0
+                    instanceMethods 0x348568
+                        entsize 12
+                        count   19
+                        name    0x32e61c description
+                        types   0x3312d8 @8@0:4
+                        imp     0x0
+                        name    0x32e628 retainCount
+                        types   0x328148 I8@0:4
+                        imp     0x0
+                        name    0x32df18 autorelease
+                        types   0x3312d8 @8@0:4
+                        imp     0x0
+                        name    0x32eb58 release
+                        types   0x327d92 Vv8@0:4
+                        imp     0x0
+                        name    0x3352d0 retain
+                        types   0x3312d8 @8@0:4
+                        imp     0x0
+                        name    0x3284a6 respondsToSelector:
+                        types   0x327d9a c12@0:4:8
+                        imp     0x0
+                        name    0x327da4 conformsToProtocol:
+                        types   0x327db8 c12@0:4@8
+                        imp     0x0
+                        name    0x327dc2 isMemberOfClass:
+                        types   0x3312e0 c12@0:4#8
+                        imp     0x0
+                        name    0x3312ea isKindOfClass:
+                        types   0x3312e0 c12@0:4#8
+                        imp     0x0
+                        name    0x327dd4 isProxy
+                        types   0x327ddc c8@0:4
+                        imp     0x0
+                        name    0x3312fc performSelector:withObject:withObject:
+                        types   0x32e634 @20@0:4:8@12@16
+                        imp     0x0
+                        name    0x32e644 performSelector:withObject:
+                        types   0x32e660 @16@0:4:8@12
+                        imp     0x0
+                        name    0x331324 performSelector:
+                        types   0x327de4 @12@0:4:8
+                        imp     0x0
+                        name    0x32e670 zone
+                        types   0x331338 ^{_NSZone=}8@0:4
+                        imp     0x0
+                        name    0x327df0 self
+                        types   0x3312d8 @8@0:4
+                        imp     0x0
+                        name    0x3284e0 class
+                        types   0x33134c #8@0:4
+                        imp     0x0
+                        name    0x327df6 superclass
+                        types   0x33134c #8@0:4
+                        imp     0x0
+                        name    0x331356 hash
+                        types   0x328148 I8@0:4
+                        imp     0x0
+                        name    0x327e02 isEqual:
+                        types   0x327db8 c12@0:4@8
+                        imp     0x0
+                    classMethods 0x0
+                    optionalInstanceMethods 0x0
+                    optionalClassMethods 0x0
+                    instanceProperties 0x0
+            instanceMethods 0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x349780
+                entsize 12
+                count   12
+                name    0x32e477 scrollViewDidScrollToTop:
+                types   0x32ad5c v12@0:4@8
+                imp     0x0
+                name    0x32e491 scrollViewShouldScrollToTop:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x32e4ae scrollViewDidEndZooming:withView:atScale:
+                types   0x32e4d8 v20@0:4@8@12f16
+                imp     0x0
+                name    0x32e4e8 scrollViewWillBeginZooming:withView:
+                types   0x327868 v16@0:4@8@12
+                imp     0x0
+                name    0x32e50d viewForZoomingInScrollView:
+                types   0x32db98 @12@0:4@8
+                imp     0x0
+                name    0x32e529 scrollViewDidEndScrollingAnimation:
+                types   0x32ad5c v12@0:4@8
+                imp     0x0
+                name    0x32e54d scrollViewDidEndDecelerating:
+                types   0x32ad5c v12@0:4@8
+                imp     0x0
+                name    0x32e56b scrollViewWillBeginDecelerating:
+                types   0x32ad5c v12@0:4@8
+                imp     0x0
+                name    0x32e58c scrollViewDidEndDragging:willDecelerate:
+                types   0x32e5b5 v16@0:4@8c12
+                imp     0x0
+                name    0x32e5c2 scrollViewWillBeginDragging:
+                types   0x32ad5c v12@0:4@8
+                imp     0x0
+                name    0x32e5df scrollViewDidZoom:
+                types   0x32ad5c v12@0:4@8
+                imp     0x0
+                name    0x32e5f2 scrollViewDidScroll:
+                types   0x32ad5c v12@0:4@8
+                imp     0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x349718
+        entsize 12
+        count   7
+        name    0x32e381 textViewDidChangeSelection:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e39d textViewDidChange:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e3b0 textView:shouldChangeTextInRange:replacementText:
+        types   0x32e3e2 c24@0:4@8{_NSRange=II}12@20
+        imp     0x0
+        name    0x32e3fe textViewDidEndEditing:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e415 textViewDidBeginEditing:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e42e textViewShouldEndEditing:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+        name    0x32e448 textViewShouldBeginEditing:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f7c 0x34a910
+    isa       0x0
+    name      0x32e607 UIScrollViewDelegate
+    protocols 0x349818
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x349780
+        entsize 12
+        count   12
+        name    0x32e477 scrollViewDidScrollToTop:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e491 scrollViewShouldScrollToTop:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+        name    0x32e4ae scrollViewDidEndZooming:withView:atScale:
+        types   0x32e4d8 v20@0:4@8@12f16
+        imp     0x0
+        name    0x32e4e8 scrollViewWillBeginZooming:withView:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+        name    0x32e50d viewForZoomingInScrollView:
+        types   0x32db98 @12@0:4@8
+        imp     0x0
+        name    0x32e529 scrollViewDidEndScrollingAnimation:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e54d scrollViewDidEndDecelerating:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e56b scrollViewWillBeginDecelerating:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e58c scrollViewDidEndDragging:willDecelerate:
+        types   0x32e5b5 v16@0:4@8c12
+        imp     0x0
+        name    0x32e5c2 scrollViewWillBeginDragging:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e5df scrollViewDidZoom:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x32e5f2 scrollViewDidScroll:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f80 0x34a970
+    isa       0x0
+    name      0x330dac UIAlertViewDelegate
+    protocols 0x349ccc
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x349c7c
+        entsize 12
+        count   6
+        name    0x330d05 alertView:didDismissWithButtonIndex:
+        types   0x32cbb4 v16@0:4@8i12
+        imp     0x0
+        name    0x330d2a alertView:willDismissWithButtonIndex:
+        types   0x32cbb4 v16@0:4@8i12
+        imp     0x0
+        name    0x330d50 didPresentAlertView:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x330d65 willPresentAlertView:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x330d7b alertViewCancel:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x330d8c alertView:clickedButtonAtIndex:
+        types   0x32cbb4 v16@0:4@8i12
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f84 0x34a998
+    isa       0x0
+    name      0x330e26 UITextFieldDelegate
+    protocols 0x349d30
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x349cd4
+        entsize 12
+        count   7
+        name    0x330bca textFieldShouldReturn:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+        name    0x330dc0 textFieldShouldClear:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+        name    0x330be1 textField:shouldChangeCharactersInRange:replacementString:
+        types   0x32e3e2 c24@0:4@8{_NSRange=II}12@20
+        imp     0x0
+        name    0x330dd6 textFieldDidEndEditing:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x330dee textFieldShouldEndEditing:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+        name    0x330bb0 textFieldDidBeginEditing:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x330e09 textFieldShouldBeginEditing:
+        types   0x327db8 c12@0:4@8
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+00349f88 0x34ae00
+    isa       0x0
+    name      0x3312b8 UIImagePickerControllerDelegate
+    protocols 0x349e0c
+        count    1
+        list[0]  0x34a75c
+            isa       0x0
+            name      0x33135c NSObject
+            protocols 0x0
+            instanceMethods 0x348568
+                entsize 12
+                count   19
+                name    0x32e61c description
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32e628 retainCount
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x32df18 autorelease
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x32eb58 release
+                types   0x327d92 Vv8@0:4
+                imp     0x0
+                name    0x3352d0 retain
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284a6 respondsToSelector:
+                types   0x327d9a c12@0:4:8
+                imp     0x0
+                name    0x327da4 conformsToProtocol:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+                name    0x327dc2 isMemberOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x3312ea isKindOfClass:
+                types   0x3312e0 c12@0:4#8
+                imp     0x0
+                name    0x327dd4 isProxy
+                types   0x327ddc c8@0:4
+                imp     0x0
+                name    0x3312fc performSelector:withObject:withObject:
+                types   0x32e634 @20@0:4:8@12@16
+                imp     0x0
+                name    0x32e644 performSelector:withObject:
+                types   0x32e660 @16@0:4:8@12
+                imp     0x0
+                name    0x331324 performSelector:
+                types   0x327de4 @12@0:4:8
+                imp     0x0
+                name    0x32e670 zone
+                types   0x331338 ^{_NSZone=}8@0:4
+                imp     0x0
+                name    0x327df0 self
+                types   0x3312d8 @8@0:4
+                imp     0x0
+                name    0x3284e0 class
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x327df6 superclass
+                types   0x33134c #8@0:4
+                imp     0x0
+                name    0x331356 hash
+                types   0x328148 I8@0:4
+                imp     0x0
+                name    0x327e02 isEqual:
+                types   0x327db8 c12@0:4@8
+                imp     0x0
+            classMethods 0x0
+            optionalInstanceMethods 0x0
+            optionalClassMethods 0x0
+            instanceProperties 0x0
+    instanceMethods 0x0
+    classMethods 0x0
+    optionalInstanceMethods 0x349de0
+        entsize 12
+        count   3
+        name    0x33108e imagePickerControllerDidCancel:
+        types   0x32ad5c v12@0:4@8
+        imp     0x0
+        name    0x331282 imagePickerController:didFinishPickingMediaWithInfo:
+        types   0x327868 v16@0:4@8@12
+        imp     0x0
+        name    0x3310b0 imagePickerController:didFinishPickingImage:editingInfo:
+        types   0x3310e9 v20@0:4@8@12@16
+        imp     0x0
+    optionalClassMethods 0x0
+    instanceProperties 0x0
+Contents of (__DATA,__objc_selrefs) section
+    0x327f20 alloc
+    0x3274f8 z
+    0x3274fa y
+    0x331c48 x
+    0x32e21a setDelegate:
+    0x3274fc setUpdateInterval:
+    0x32750f sharedAccelerometer
+    0x32aeec init
+    0x32e168 openURL:
+    0x327a8f initWithData:encoding:
+    0x32e09c length
+    0x32ae4a userInfo
+    0x327aa6 localizedDescription
+    0x32df54 appendData:
+    0x327abb setLength:
+    0x32e174 show
+    0x327ac7 initWithTitle:message:delegate:cancelButtonTitle:otherButtonTitles:
+    0x33118e removeFromSuperview
+    0x3352d0 retain
+    0x335128 data
+    0x327b0b initWithRequest:delegate:
+    0x327b25 requestWithURL:cachePolicy:timeoutInterval:
+    0x327b51 URLWithString:
+    0x327b60 setCenter:
+    0x32e210 setAlpha:
+    0x32e24c startAnimating
+    0x327b6c setUserInteractionEnabled:
+    0x32e30c uniqueIdentifier
+    0x327b88 model
+    0x327b8e initWithString:
+    0x327f38 objectForKey:
+    0x327ba0 currentLocale
+    0x327bae stringByReplacingOccurrencesOfString:withString:
+    0x327897 buttonEventGet::::::
+    0x327f68 sharedApplication
+    0x327be1 IGPSendGameInfo::
+    0x32e2b0 view
+    0x327bf4 startIgpHtmlWithLanguage:
+    0x327c0f refreshWebView
+    0x32830c dealloc
+    0x32eb58 release
+    0x327c1e isMultitaskingSupported
+    0x327c36 addObserver:selector:name:object:
+    0x327951 didRotate:
+    0x327c58 defaultCenter
+    0x327c66 beginGeneratingDeviceOrientationNotifications
+    0x327a3b initDisplay
+    0x327c94 setStatusBarOrientation:animated:
+    0x327cb6 setStatusBarHidden:
+    0x327cca setIdleTimerDisabled:
+    0x327ce0 getCString:maxLength:encoding:
+    0x32e8c0 systemVersion
+    0x32e8ce currentDevice
+    0x327cff makeKeyAndVisible
+    0x32eb36 addSubview:
+    0x32eb42 setExclusiveTouch:
+    0x327d14 setMultipleTouchEnabled:
+    0x327d2d setBackgroundColor:
+    0x32eaba blackColor
+    0x327d44 initWithFrame:
+    0x3284a6 respondsToSelector:
+    0x328486 scale
+    0x3284d0 bounds
+    0x327d56 mainScreen
+    0x328298 swapBuffers
+    0x3278fc stopMovie:
+    0x327e30 loadMovie:
+    0x327907 startMovie:
+    0x3278c5 startTwitter:
+    0x3311c2 orientation
+    0x32f52c performSelectorOnMainThread:withObject:waitUntilDone:
+    0x3278de setStatusBar:
+    0x32782b sharedInstance
+    0x327e3c presentRenderbuffer:
+    0x327e54 renderbufferStorage:fromDrawable:
+    0x327e76 setCurrentContext:
+    0x327e89 initWithAPI:
+    0x327e96 setDrawableProperties:
+    0x327ead dictionaryWithObjectsAndKeys:
+    0x327ecb numberWithBool:
+    0x327edb setOpaque:
+    0x327f5c UTF8String
+    0x327ee9 stringByAppendingPathComponent:
+    0x331260 objectAtIndex:
+    0x327f0c initWithUTF8String:
+    0x327f46 standardUserDefaults
+    0x3278ec sendGameInfo
+    0x327924 startIGP
+    0x327f7a new
+    0x3281da touchesChangedWithEvent:
+    0x32846d phase
+    0x328473 locationInView:
+    0x32e102 countByEnumeratingWithState:objects:count:
+    0x331236 currentContext
+    0x3282fd layoutSubviews
+    0x328350 _createSurface
+    0x328340 _destroySurface
+    0x32848c setContentScaleFactor:
+    0x3284ba contentScaleFactor
+    0x327d61 didResizeEAGLSurfaceForView:
+    0x3284da layer
+    0x3284e0 class
+    0x32ad0e isLoading
+    0x32ad1f isPlaying
+    0x32ad29 stopMovie
+    0x32ace5 movieSubtitles_reset
+    0x32acfa movieSubtitles_init
+    0x32ad33 playMovie
+    0x32adaf initWithFile:andFlipped:
+    0x32acd9 freeMovie
+    0x32adfb removeObserver:name:object:
+    0x32ae17 keyWindow
+    0x32eb28 setTransform:
+    0x32ae24 stop
+    0x32ae2a play
+    0x32ae2f loadState
+    0x32ae39 playbackState
+    0x332b80 code
+    0x32ae53 moviePlayer
+    0x32ae62 setScalingMode:
+    0x32ae72 setFullscreen:
+    0x32ae81 setUseApplicationAudioSession:
+    0x32aea0 setMovieControlMode:
+    0x32aeb5 setControlStyle:
+    0x32ad66 moviePlayBackStateChange:
+    0x32ad3d moviePlayBackLoadStateChanged:
+    0x32ad97 moviePlayBackDidFinish:
+    0x32ad80 moviePreloadDidFinish:
+    0x32aec6 initWithContentURL:
+    0x32aeda fileURLWithPath:
+    0x32ebc6 pathForResource:ofType:
+    0x32ebde mainBundle
+    0x32de40 createDirectoryAtPath:attributes:
+    0x32e7f4 initWithContentsOfURL:
+    0x32de65 substringWithRange:
+    0x32d99b downloadFileWithName::::
+    0x32de79 removeItemAtPath:error:
+    0x32d9dc downloadGameFree:
+    0x32d9ee downloadGamePaid:
+    0x32d986 downloadResFromURL::
+    0x32de91 statusCode
+    0x32de9c sendSynchronousRequest:returningResponse:error:
+    0x32decc setHTTPBody:
+    0x32ded9 dataUsingEncoding:allowLossyConversion:
+    0x32df01 setHTTPMethod:
+    0x32df10 setURL:
+    0x32df18 autorelease
+    0x32df24 stringWithFormat:
+    0x32e84c writeToFile:atomically:encoding:error:
+    0x32da24 readHeader:::
+    0x32df39 writeToFile:atomically:
+    0x32df60 copyItemAtPath:toPath:error:
+    0x32df7d hasSuffix:
+    0x32df88 initWithArray:
+    0x32df97 componentsSeparatedByString:
+    0x32dfb4 nextObject
+    0x32d96a makeDir::
+    0x32dfbf enumeratorAtPath:
+    0x32dad3 getUpdateLinkAddress
+    0x32dfd1 initWithContentsOfFile:
+    0x32dfe9 fileExistsAtPath:
+    0x32dffb defaultManager
+    0x32e00a isAbsolutePath
+    0x32e01c stringWithUTF8String:
+    0x331272 resourcePath
+    0x32db03 createMMButtons
+    0x32e032 addTarget:action:forControlEvents:
+    0x32dca9 startIgpHtmlUsingMMButton:
+    0x32e055 setTitle:forState:
+    0x32e068 buttonWithType:
+    0x32db13 removeAllWidgetsFromSuperview
+    0x32e078 setNetworkActivityIndicatorVisible:
+    0x32e0a3 sendActionsForControlEvents:
+    0x32e0c0 isEqualToString:
+    0x32e0d1 stringByEvaluatingJavaScriptFromString:
+    0x32dc13 startUpdateHTML
+    0x3280f0 delegate
+    0x32e0f9 subviews
+    0x32db86 findButtonInView:
+    0x32b428 count
+    0x327dc2 isMemberOfClass:
+    0x32e12e resignFirstResponder
+    0x331aa0 text
+    0x32e144 goForward
+    0x32e14e goBack
+    0x32e155 absoluteString
+    0x32e164 URL
+    0x32daf7 quitIgpHtml
+    0x32e179 loadRequest:
+    0x32e186 requestWithURL:
+    0x32e196 viewDidLoad
+    0x32da00 parseResponse:
+    0x32e1a2 clearColor
+    0x32e1ad setTextColor:
+    0x32e1bb whiteColor
+    0x32e1c6 setText:
+    0x32eb16 setTextAlignment:
+    0x32e1d1 setAdjustsFontSizeToFitWidth:
+    0x32eae6 setFont:
+    0x32e1f0 boldSystemFontOfSize:
+    0x32e206 setImage:
+    0x32da0f makeHTMLFromBoundle:
+    0x32dae8 getIgpHtmlLink
+    0x32dc23 keyboardWillHide:
+    0x32dc35 keyboardWillShow:
+    0x32dc47 startIgpHtml
+    0x32e227 stopAnimating
+    0x32ebea setHidden:
+    0x32e238 invalidate
+    0x32e243 isValid
+    0x32dc64 verifyUpdateDesignEnded:
+    0x32dc54 verifySaveDone:
+    0x32e80e detachNewThreadSelector:toTarget:withObject:
+    0x32da79 saveAllResToDocumentsFolder
+    0x32da98 getDefaultDocumentsPath
+    0x32e25b setFrame:
+    0x3311a2 initWithActivityIndicatorStyle:
+    0x32e265 grayColor
+    0x32dab0 checkForNetworkAvailability
+    0x32e26f scheduledTimerWithTimeInterval:target:selector:userInfo:repeats:
+    0x32dc7d setNetworkToLoConnectionStatus:
+    0x32e2b5 orangeColor
+    0x32e2c1 setStatusBarHidden:animated:
+    0x32e2de setView:
+    0x32e2e8 hasPrefix:
+    0x32dcc4 igpHtmlInit
+    0x32e2f3 loadHTMLString:baseURL:
+    0x32e8dc stringWithCString:encoding:
+    0x32e31e stringWithContentsOfFile:
+    0x32e338 stringByAppendingFormat:
+    0x32e7cb sendInfo
+    0x32e83c initWithFormat:
+    0x32e873 stringFromDate:
+    0x32c0c8 date
+    0x32e884 stringWithContentsOfFile:encoding:error:
+    0x32e8b0 setDateFormat:
+    0x32e987 FadebuttonOnTime:
+    0x32ea7d setEnabled:
+    0x32ea89 backgroundColor
+    0x32f0d8 font
+    0x32ea9b lineBreakMode
+    0x32eaa9 frame
+    0x32eaaf transform
+    0x32e999 ActivateSkip:
+    0x32eac7 colorWithRed:green:blue:alpha:
+    0x32eaf2 setLineBreakMode:
+    0x32eb04 setNumberOfLines:
+    0x32ea10 BtnTapped_Skip:event:
+    0x32eb60 setBackgroundImage:forState:
+    0x32eb7e stretchableImageWithLeftCapWidth:topCapHeight:
+    0x32ebad imageWithContentsOfFile:
+    0x32aaa8 alpha
+    0x32f502 clickBack
+    0x32f50c clickOK
+    0x32f514 onRotateDevice
+    0x32f523 endInput
+    0x32f562 myInit
+    0x32f569 init:LengthOfText:IsView:IsPwd:Width:HMiddle:
+    0x330c86 setSecureTextEntry:
+    0x330c9a setBorderStyle:
+    0x330caa becomeFirstResponder
+    0x330cbf setBounds:
+    0x330cca setKeyboardType:
+    0x330cdb setContentMode:
+    0x330ceb setTag:
+    0x330cf3 systemFontOfSize:
+    0x331121 bytes
+    0x331127 dismissModalViewControllerAnimated:
+    0x33114e setAllowsImageEditing:
+    0x331165 setSourceType:
+    0x331175 isSourceTypeAvailable:
+    0x33100b UIImageToPNGBuffer:ppBuf:iLenght:
+    0x331062 ResizeImage:iWidth:iHeight:
+    0x3310f9 startPhotoLibraryPiker:
+    0x3311ce statusBarOrientation
+    0x3311e5 setStatusBarOrientation:
+    0x331200 CGImage
+    0x331208 size
+    0x33120d imageWithData:
+    0x33121c initWithBytes:length:
+    0x331232 API
+    0x331245 intValue
+    0x33124e substringToIndex:
+    0x3352c0 nowPlayingItem
+    0x335295 valueForProperty:
+    0x335336 iPodMusicPlayer
+    0x3352d7 collections
+    0x3352e3 playlistsQuery
+    0x3352f5 pause
+    0x3352fc setLibraryCallback:
+    0x335310 setSongCallback:
+    0x335321 setStateCallback:
+    0x3353c5 reset
+    0x33537a handle_libraryChanged:
+    0x335391 handle_songChanged:
+    0x3353e6 beginGeneratingPlaybackNotifications
+    0x3353a5 handle_stateChanged:
+    0x33540b beginGeneratingLibraryChangeNotifications
+    0x335435 defaultMediaLibrary
+    0x335449 endGeneratingPlaybackNotifications
+Contents of (__DATA,__objc_imageinfo) section
+    version 0
+    flags   0x0
