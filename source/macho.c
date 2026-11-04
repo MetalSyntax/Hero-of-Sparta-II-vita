@@ -212,6 +212,104 @@ void macho_hook(const char *name, void *dst) {
     kuKernelFlushCaches((void *)(a & ~1), sizeof(code));
 }
 
+static void macho_patch_vfp_vectors(uint8_t *text, uint32_t text_sz, uint32_t text_vm) {
+    // Pattern mappings: VFP vector instruction -> NEON SIMD instruction
+    // On ARMv7 Cortex-A9 (PS Vita), VFP vector mode (FPSCR.LEN != 0) is deprecated
+    // and unsupported in hardware, triggering Undefined instruction exception 0x30002.
+    // In HOS2 (compiled for ARMv6 VFPv2), 4x4 matrix and vector transformations use
+    // FPSCR.LEN=3 (length 4) and LEN=2 (length 3). All 73 vector blocks in HOS2 map
+    // 1:1 to standard ARM NEON SIMD instructions operating on q6/q7 and q2-q5.
+    static const struct {
+        uint32_t vfp;
+        uint32_t neon;
+    } k_vfp_neon[] = {
+        { 0xee24ca00, 0xf3a4c940 }, // vmul.f32 q6, q2, d0[0]
+        { 0xee06ca20, 0xf3a6c160 }, // vmla.f32 q6, q3, d0[1]
+        { 0xee08ca01, 0xf3a8c141 }, // vmla.f32 q6, q4, d1[0]
+        { 0xee0aca21, 0xf3aac161 }, // vmla.f32 q6, q5, d1[1]
+        { 0xee24ea02, 0xf3a4e942 }, // vmul.f32 q7, q2, d2[0]
+        { 0xee06ea22, 0xf3a6e162 }, // vmla.f32 q7, q3, d2[1]
+        { 0xee08ea03, 0xf3a8e143 }, // vmla.f32 q7, q4, d3[0]
+        { 0xee0aea23, 0xf3aae163 }, // vmla.f32 q7, q5, d3[1]
+        { 0xee3cca0a, 0xf20ccd4a }, // vadd.f32 q6, q6, q5
+    };
+    const uint32_t NOP_INSTR = 0xe1a00000; // nop (mov r0, r0)
+
+    uint32_t *words = (uint32_t *)text;
+    uint32_t nwords = text_sz / 4;
+
+    uint32_t blocks_patched = 0;
+    uint32_t instrs_patched = 0;
+
+    for (uint32_t i = 3; i < nwords - 4; i++) {
+        uint32_t w = words[i];
+        if ((w & 0x0fff0fff) != 0x0ee10a10)
+            continue; // Not a vmsr fpscr, rX
+
+        // Check if preceding instruction is: orr r0, r0, #0x20000 or #0x30000 (entering vector mode)
+        uint32_t w_prev = words[i - 1];
+        if ((w_prev & 0x0fef0000) != 0x03800000)
+            continue; // Not an enter sequence
+
+        uint32_t enter_idx = i;
+
+        // Find paired exit vmsr fpscr, rX
+        uint32_t exit_idx = 0;
+        for (uint32_t j = enter_idx + 1; j < nwords && j < enter_idx + 64; j++) {
+            if ((words[j] & 0x0fff0fff) == 0x0ee10a10) {
+                exit_idx = j;
+                break;
+            }
+        }
+
+        if (!exit_idx)
+            continue;
+
+        // NOP out the enter sequence (vmrs, bic, orr, vmsr: 4 words)
+        for (uint32_t p = enter_idx - 3; p <= enter_idx; p++) {
+            words[p] = NOP_INSTR;
+            instrs_patched++;
+        }
+
+        // Find the exit vmrs r0, fpscr (0xeef10a10) before exit_idx
+        uint32_t exit_vmrs_idx = exit_idx - 2;
+        for (uint32_t p = exit_idx - 1; p >= enter_idx && p >= exit_idx - 5; p--) {
+            if (words[p] == 0xeef10a10) {
+                exit_vmrs_idx = p;
+                break;
+            }
+        }
+
+        // NOP out the exit sequence (from vmrs to exit vmsr)
+        for (uint32_t p = exit_vmrs_idx; p <= exit_idx; p++) {
+            words[p] = NOP_INSTR;
+            instrs_patched++;
+        }
+
+        // Translate VFP vector math instructions inside body to NEON SIMD
+        for (uint32_t p = enter_idx + 1; p < exit_vmrs_idx; p++) {
+            uint32_t inst = words[p];
+            for (size_t k = 0; k < sizeof(k_vfp_neon) / sizeof(k_vfp_neon[0]); k++) {
+                if (inst == k_vfp_neon[k].vfp) {
+                    words[p] = k_vfp_neon[k].neon;
+                    instrs_patched++;
+                    break;
+                }
+            }
+        }
+
+        blocks_patched++;
+        i = exit_idx; // Advance past this block
+    }
+
+    if (blocks_patched > 0) {
+        l_info("Patched %u VFPv2 vector blocks (%u instructions) -> ARM NEON SIMD.",
+               (unsigned)blocks_patched, (unsigned)instrs_patched);
+    } else {
+        l_info("VFPv2 vector scan: 0 vector blocks found (already patched or none).");
+    }
+}
+
 static void apply_rebase(const char *rebase_path) {
     FILE *f = fopen(rebase_path, "rb");
     if (!f) {
@@ -420,6 +518,9 @@ int macho_load(const char *bin_path, const char *rebase_path) {
     // Apply offline rebase relocations
     if (rebase_path)
         apply_rebase(rebase_path);
+
+    // Patch ARMv6 VFPv2 vector mode blocks -> ARM NEON SIMD
+    macho_patch_vfp_vectors(text_buf, text_size, text_vm);
 
     // Copy final __TEXT to executable memory block
     kuKernelCpuUnrestrictedMemcpy((void *)text_real, text_buf, ALIGN(text_size, 0x1000));

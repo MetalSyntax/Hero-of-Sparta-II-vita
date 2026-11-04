@@ -75,6 +75,19 @@ ml_align_call:
     stm     lr!, {r6-r8, r10}
     ldm     r5!, {r6-r8, r10}
     stm     lr!, {r6-r8, r10}
+    ldr     r5, [r4, #28]           @ guest lr: lets heap logs name the real guest caller (racy, logs only)
+    ldr     r6, =ml_guest_lr
+    str     r5, [r6]
     blx     ip
+    .global ml_align_ret
+ml_align_ret:
     mov     sp, r4
     pop     {r4-r8, r10, r11, pc}
+    .ltorg
+
+    .data
+    .global ml_guest_lr
+    .align 2
+ml_guest_lr:
+    .word   0
+    .text

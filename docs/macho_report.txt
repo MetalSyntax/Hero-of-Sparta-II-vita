@@ -2,7 +2,7 @@ Binario: ux0_data/heroofspartaii/game_app/HOS2 (armv6)
 FairPlay cryptid: 0 (descifrado)
 Rango imagen: 0x1000-0x35b000
 Funciones identificadas en __text: 13875
-Rebase: 36871 palabras -> ux0_data/heroofspartaii/rebase.bin
+Rebase: 39326 palabras -> ux0_data/heroofspartaii/rebase.bin
   __cfstring             ptr            : 170
   __const                ptr            : 4329
   __data                 ptr            : 204
@@ -16,6 +16,7 @@ Rebase: 36871 palabras -> ux0_data/heroofspartaii/rebase.bin
   __objc_selrefs         ptr            : 300
   __objc_superrefs       ptr            : 9
   __symbol_stub4         la_ptr         : 384
+  __text_jumptable       entry          : 2456
   __text_lit             __bss          : 11962
   __text_lit             __cfstring     : 253
   __text_lit             __common       : 644
@@ -28,7 +29,10 @@ Rebase: 36871 palabras -> ux0_data/heroofspartaii/rebase.bin
   __text_lit             __objc_const   : 382
   __text_lit             __objc_selrefs : 781
   __text_lit             __objc_superrefs: 12
-  __text_lit             func           : 4474
+  __text_lit             func           : 4472
+  __text_lit             func_skip_num  : 2
+Literales numéricos que coinciden con una función (no reubicados): 1
+  slot 0x13cbdc = 0x9c40 (40000)
 Imports dinámicos únicos: 1123
   _AudioComponentFindNext
   _AudioComponentInstanceDispose

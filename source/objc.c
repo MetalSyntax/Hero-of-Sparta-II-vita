@@ -8,20 +8,32 @@
 #include <psp2/common_dialog.h>
 #include <psp2/ime_dialog.h>
 #include <psp2/kernel/threadmgr.h>
+#include <pthread.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <psp2/io/stat.h>
+#include <psp2/apputil.h>
+#include <psp2/system_param.h>
 
+#include "darwin.h"
 #include "darwin_printf.h"
 #include "gles.h"
 #include "hle.h"
 #include "imports.h"
 #include "log.h"
 #include "macho.h"
+#include "input.h"
 #include "objc.h"
+#include "video.h"
+
+// Forward declaration of ObjC stub class
+struct objc_class_stub;
+static struct objc_class_stub OBJC_CLASS_$_NSString;
+static struct objc_class_stub OBJC_CLASS_$_NSArray;
 
 // ---------------------------------------------------------------- NSString & CFString
 
@@ -35,15 +47,19 @@ typedef struct {
 static ns_string *ns_new(const char *s) {
     static ns_string ring[512];
     static int next = 0;
+    static pthread_mutex_t ns_mtx = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&ns_mtx);
     ns_string *o = &ring[next++ & 511];
+    o->isa = (void *)&OBJC_CLASS_$_NSString;
     free(o->str);
     o->str = strdup(s ? s : "");
     o->len = strlen(o->str);
     o->flags = 0x7C8;
+    pthread_mutex_unlock(&ns_mtx);
     return o;
 }
 
-static const char *ns_cstr(const void *o) {
+const char *ns_cstr(const void *o) {
     if (!o) return "";
     uintptr_t val = (uintptr_t)o;
     if (val < 0x10000) return "";
@@ -54,13 +70,15 @@ static const char *ns_cstr(const void *o) {
             uint32_t f = *(uint32_t *)(deref + 4);
             if ((f & 0xFF) == 0xC8 || f == 0x7C8) {
                 const char *cs = *(const char **)(deref + 8);
-                return cs ? cs : "";
+                return (cs && (uintptr_t)cs >= 0x10000) ? cs : "";
             }
         }
     }
     // Check if it is a compile-time CFConstantString or dynamic ns_string (cstr at offset +8)
     const ns_string *ns = (const ns_string *)o;
-    return ns->str ? ns->str : "";
+    if (ns->isa == (void *)&OBJC_CLASS_$_NSArray) return "";
+    if (!ns->str || (uintptr_t)ns->str < 0x10000) return "";
+    return ns->str;
 }
 
 static uint32_t utf8_next(const unsigned char **p) {
@@ -389,7 +407,7 @@ typedef struct guest_class_info {
     int method_count;
 } guest_class_info;
 
-static guest_class_info registered_classes[32];
+static guest_class_info registered_classes[32]; // 12 HOS2 classes + metaclasses with methods
 static int registered_class_count = 0;
 
 void *objc_find_class(const char *name) {
@@ -419,6 +437,8 @@ int objc_has_method(void *cls, const char *sel_name) {
     return objc_get_imp(cls, sel_name) != 0;
 }
 
+static void *g_eagl_view; // receives touchesBegan/Moved/Ended:withEvent:
+
 void *objc_class_alloc(void *cls) {
     if (!cls) return NULL;
     uint32_t size = 128;
@@ -431,6 +451,10 @@ void *objc_class_alloc(void *cls) {
     }
     void **obj = calloc(1, size + 16);
     *obj = cls; // obj->isa = cls
+    if (!g_eagl_view && cls == objc_find_class("EAGLView")) {
+        g_eagl_view = obj;
+        l_info("[INPUT] EAGLView instance %p (touch target)", obj);
+    }
     return obj;
 }
 
@@ -439,44 +463,50 @@ static inline uintptr_t to_guest_mem(uint32_t va) {
     return (va < MACHO_SLIDE) ? (MACHO_SLIDE + va) : va;
 }
 
+// Registers one class_t: a class (instance methods) or its metaclass (class methods, e.g.
+// +[AppController sharedInstance]). Dispatch goes through the receiver's isa, as in the real runtime.
+static void register_guest_class(uint32_t cls_mem, int meta) {
+    uint32_t ro_mem = to_guest_mem(*(uint32_t *)(cls_mem + 16));
+    const char *cname = (const char *)to_guest_mem(*(uint32_t *)(ro_mem + 16));
+    uint32_t isize = *(uint32_t *)(ro_mem + 8);
+    uint32_t methods_va = *(uint32_t *)(ro_mem + 20);
+    if (meta && !methods_va)
+        return;
+
+    guest_class_info *ci = &registered_classes[registered_class_count++];
+    ci->name = cname;
+    ci->cls_ptr = cls_mem;
+    ci->instance_size = meta ? 0 : isize;
+    ci->methods = NULL;
+    ci->method_count = 0;
+
+    if (methods_va) {
+        uint32_t methods_mem = to_guest_mem(methods_va);
+        uint32_t mcount = *(uint32_t *)(methods_mem + 4);
+        ci->method_count = mcount;
+        ci->methods = calloc(mcount, sizeof(guest_method));
+        for (uint32_t m = 0; m < mcount; m++) {
+            uint32_t m_entry = methods_mem + 8 + m * 12;
+            ci->methods[m].name = (const char *)to_guest_mem(*(uint32_t *)m_entry);
+            ci->methods[m].imp = to_guest_mem(*(uint32_t *)(m_entry + 8));
+        }
+    }
+    l_info("[OBJC] Registered guest %s %s (size %u, %d methods)", meta ? "metaclass" : "class", cname,
+           (unsigned)ci->instance_size, ci->method_count);
+}
+
 void objc_init(void) {
     l_info("[OBJC] Registering guest Mach-O classes from __objc_classlist...");
     // In HOS2, __objc_classlist is at offset 0x349f34
     uint32_t *cl_ptrs = (uint32_t *)(MACHO_SLIDE + 0x349f34);
     int nclasses = 12; // 48 bytes / 4
-    for (int i = 0; i < nclasses; i++) {
-        uint32_t cls_va = cl_ptrs[i];
-        if (!cls_va) continue;
-        uint32_t cls_mem = to_guest_mem(cls_va);
-        uint32_t ro_va = *(uint32_t *)(cls_mem + 16);
-        uint32_t ro_mem = to_guest_mem(ro_va);
-        uint32_t name_va = *(uint32_t *)(ro_mem + 16);
-        const char *cname = (const char *)to_guest_mem(name_va);
-        uint32_t isize = *(uint32_t *)(ro_mem + 8);
-        uint32_t methods_va = *(uint32_t *)(ro_mem + 20);
-
-        guest_class_info *ci = &registered_classes[registered_class_count++];
-        ci->name = cname;
-        ci->cls_ptr = cls_mem;
-        ci->instance_size = isize;
-        ci->methods = NULL;
-        ci->method_count = 0;
-
-        if (methods_va) {
-            uint32_t methods_mem = to_guest_mem(methods_va);
-            uint32_t mcount = *(uint32_t *)(methods_mem + 4);
-            ci->method_count = mcount;
-            ci->methods = calloc(mcount, sizeof(guest_method));
-            for (uint32_t m = 0; m < mcount; m++) {
-                uint32_t m_entry = methods_mem + 8 + m * 12;
-                uint32_t m_name_va = *(uint32_t *)m_entry;
-                uint32_t m_imp_va = *(uint32_t *)(m_entry + 8);
-                ci->methods[m].name = (const char *)to_guest_mem(m_name_va);
-                ci->methods[m].imp = to_guest_mem(m_imp_va);
-            }
-        }
-        l_info("[OBJC] Registered guest class %s (size %u, %d methods)", cname, (unsigned)isize, ci->method_count);
-    }
+    // Classes first so objc_find_class() resolves a name to the class, not its metaclass.
+    for (int i = 0; i < nclasses; i++)
+        if (cl_ptrs[i])
+            register_guest_class(to_guest_mem(cl_ptrs[i]), 0);
+    for (int i = 0; i < nclasses; i++)
+        if (cl_ptrs[i])
+            register_guest_class(to_guest_mem(*(uint32_t *)to_guest_mem(cl_ptrs[i])), 1);
 }
 
 // ---------------------------------------------------------------- System Stub Classes
@@ -572,6 +602,30 @@ static void d_objc_enumerationMutation(void *col) { (void)col; }
 static uint32_t dummy_obj[16];
 static uint32_t ret_obj(void) { return (uint32_t)dummy_obj; }
 
+typedef struct {
+    void *isa;
+    uint32_t count;
+    void *items[64];
+} ns_array;
+
+static ns_array *ns_array_new(void **items, uint32_t count) {
+    static ns_array ring[64];
+    static int next = 0;
+    static pthread_mutex_t arr_mtx = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&arr_mtx);
+    ns_array *arr = &ring[next++ & 63];
+    arr->isa = (void *)&OBJC_CLASS_$_NSArray;
+    arr->count = count > 64 ? 64 : count;
+    for (uint32_t i = 0; i < arr->count; i++) {
+        arr->items[i] = items ? items[i] : NULL;
+    }
+    for (uint32_t i = arr->count; i < 64; i++) {
+        arr->items[i] = NULL;
+    }
+    pthread_mutex_unlock(&arr_mtx);
+    return arr;
+}
+
 static void log_unknown(void *self, const char *sel) {
     static const char *seen[512];
     static int nseen;
@@ -582,6 +636,138 @@ static void log_unknown(void *self, const char *sel) {
 }
 
 static int sel_is(const char *sel, const char *name) { return !strcmp(sel, name); }
+
+// Forward declaration
+static uint32_t objc_msgSend(void *self, const char *sel, ...);
+
+// ---------------------------------------------------------------- NSNotificationCenter Observers & Video
+
+typedef struct {
+    void *observer;
+    const char *sel;
+    char name[128];
+    void *object;
+} observer_t;
+static observer_t observers[64];
+static int nobservers = 0;
+static pthread_mutex_t obs_mtx = PTHREAD_MUTEX_INITIALIZER;
+static char g_movie_path[512] = {0};
+static void *g_preload_player;
+static void *g_movie_ctl, *g_autoplay_player;
+
+static void d_post_notification(const char *name, void *object) {
+    if (!name) return;
+    l_info("[OBJC] NSNotificationCenter post: '%s' (object %p)", name, object);
+    pthread_mutex_lock(&obs_mtx);
+    observer_t obs_copy[64];
+    int n_copy = nobservers;
+    memcpy(obs_copy, observers, sizeof(observer_t) * n_copy);
+    pthread_mutex_unlock(&obs_mtx);
+
+    for (int i = 0; i < n_copy; i++) {
+        if ((!obs_copy[i].name[0] || !strcmp(obs_copy[i].name, name)) &&
+            (!obs_copy[i].object || obs_copy[i].object == object)) {
+            l_info("[OBJC] Dispatching '%s' to observer %p sel '%s'", name, obs_copy[i].observer, obs_copy[i].sel);
+            objc_msgSend(obs_copy[i].observer, obs_copy[i].sel, (uint32_t)ret_obj());
+        }
+    }
+}
+
+// Called once per presented frame, outside any guest objc call, to deliver deferred notifications.
+void objc_pump(void) {
+    void *p = g_preload_player;
+    if (p) {
+        g_preload_player = NULL;
+        d_post_notification("MPMoviePlayerContentPreloadDidFinishNotification", p);
+        return;
+    }
+    p = g_autoplay_player;
+    if (p) {
+        g_autoplay_player = NULL;
+        objc_msgSend(p, "play");
+    }
+}
+
+// ---------------------------------------------------------------- UITouch delivery
+
+typedef struct { void *isa; float x, y; uint32_t phase; int id; } ui_touch;
+static uint32_t ui_touch_isa[8]; // marker isa: host UITouch objects
+static ui_touch ui_touches[MAX_SYNTH_TOUCHES];
+
+// Inverse of -[EAGLView touchesChangedWithEvent:] (0x1912a0): with orientation 3 the game uses
+// (x, y) = (p.y, 320 - p.x), with 4 (480 - p.y, p.x), else (0, 0). gx/gy are already in that 480x320 space.
+static void touch_set_location(ui_touch *t, int gx, int gy) {
+    uint32_t orient = **(uint32_t **)(MACHO_SLIDE + 0x0034085c);
+    if (orient == 4) {
+        t->x = gy;
+        t->y = 480 - gx;
+    } else {
+        if (orient != 3) {
+            static int warned;
+            if (!warned++) l_warn("[INPUT] game orientation %u: touches land at (0,0)", (unsigned)orient);
+        }
+        t->x = 320 - gy;
+        t->y = gx;
+    }
+}
+
+static void send_touches(const char *sel, ui_touch **set, int n) {
+    static int logged;
+    if (!n) return;
+    if (logged < 20) {
+        logged++;
+        l_info("[INPUT] %s n=%d first id=%d view=(%.0f,%.0f)", sel, n, set[0]->id, set[0]->x, set[0]->y);
+    }
+    objc_msgSend(g_eagl_view, sel, (uint32_t)ns_array_new((void **)set, n), (uint32_t)ret_obj());
+}
+
+// Diff the current Vita touches against the previous poll and deliver UIKit touch phases.
+// UITouch objects are pooled per finger, so the same pointer identifies a finger across phases.
+void objc_deliver_touches(const touch_point *cur, int ncur) {
+    if (!g_eagl_view) return;
+    ui_touch *began[MAX_SYNTH_TOUCHES], *moved[MAX_SYNTH_TOUCHES], *ended[MAX_SYNTH_TOUCHES];
+    int nb = 0, nm = 0, ne = 0;
+    uint8_t seen[MAX_SYNTH_TOUCHES] = {0};
+
+    for (int i = 0; i < ncur; i++) {
+        int slot = -1, free_slot = -1;
+        for (int k = 0; k < MAX_SYNTH_TOUCHES; k++) {
+            if (ui_touches[k].isa && ui_touches[k].id == cur[i].id) slot = k;
+            else if (!ui_touches[k].isa && free_slot < 0) free_slot = k;
+        }
+        if (slot < 0) {
+            if (free_slot < 0) continue;
+            slot = free_slot;
+            ui_touch *t = &ui_touches[slot];
+            t->isa = ui_touch_isa;
+            t->id = cur[i].id;
+            t->phase = 0; // UITouchPhaseBegan
+            touch_set_location(t, cur[i].gx, cur[i].gy);
+            began[nb++] = t;
+        } else {
+            ui_touch *t = &ui_touches[slot];
+            float ox = t->x, oy = t->y;
+            touch_set_location(t, cur[i].gx, cur[i].gy);
+            if (t->x != ox || t->y != oy) {
+                t->phase = 1; // UITouchPhaseMoved
+                moved[nm++] = t;
+            }
+        }
+        seen[slot] = 1;
+    }
+    for (int k = 0; k < MAX_SYNTH_TOUCHES; k++) {
+        if (ui_touches[k].isa && !seen[k]) {
+            ui_touches[k].phase = 3; // UITouchPhaseEnded
+            ended[ne++] = &ui_touches[k];
+        }
+    }
+
+    send_touches("touchesBegan:withEvent:", began, nb);
+    send_touches("touchesMoved:withEvent:", moved, nm);
+    send_touches("touchesEnded:withEvent:", ended, ne);
+    for (int i = 0; i < ne; i++)
+        ended[i]->isa = NULL; // slot free again only after the game saw the ended phase
+}
 
 static uint32_t objc_msgSend_system_impl(void *self, const char *sel, va_list ap) {
     if (!self || !sel) return 0;
@@ -594,32 +780,56 @@ static uint32_t objc_msgSend_system_impl(void *self, const char *sel, va_list ap
     time_t t;
 
     // Allocation & Instantiation
-    if (sel_is(sel, "alloc") || sel_is(sel, "allocWithZone:") || sel_is(sel, "new")) {
+    if (sel_is(sel, "phase") && *(void **)self == ui_touch_isa) {
+        r = ((ui_touch *)self)->phase;
+    } else if (sel_is(sel, "alloc") || sel_is(sel, "allocWithZone:") || sel_is(sel, "new")) {
         r = (uint32_t)objc_class_alloc(self);
         if (!r) r = ret_obj();
     }
-    // Initializers: MUST return self!
+    // Initializers: MUST return self or appropriate object!
     else if (sel_is(sel, "initWithAPI:")) {
         uint32_t api = va_arg(ap, uint32_t);
         l_info("EAGLContext initWithAPI:%u", (unsigned)api);
         r = (api == 1) ? (uint32_t)self : 0;
+    } else if (sel_is(sel, "initWithUTF8String:") || sel_is(sel, "initWithCString:encoding:")) {
+        r = (uint32_t)ns_new((const char *)a);
+    } else if (sel_is(sel, "initWithString:")) {
+        r = (uint32_t)ns_new(ns_cstr((void *)a));
+    } else if (sel_is(sel, "initWithFormat:")) {
+        r = (uint32_t)ns_format(ns_cstr((void *)a), ap_copy);
+    } else if (sel_is(sel, "initWithObjects:count:")) {
+        r = (uint32_t)ns_array_new((void **)a, va_arg(ap_copy, uint32_t));
+    } else if (sel_is(sel, "initWithArray:")) {
+        ns_array *other = (ns_array *)a;
+        if (other && other->isa == (void *)&OBJC_CLASS_$_NSArray)
+            r = (uint32_t)ns_array_new(other->items, other->count);
+        else
+            r = (uint32_t)ns_array_new(NULL, 0);
+    } else if (sel_is(sel, "initWithContentURL:")) {
+        const char *url = ns_cstr((void *)a);
+        if (url) {
+            if (!strncmp(url, "file://", 7)) url += 7;
+            darwin_path(url, g_movie_path, sizeof(g_movie_path));
+            l_info("[VIDEO] MPMoviePlayerController initWithContentURL: '%s' -> '%s'", url, g_movie_path);
+        } else {
+            g_movie_path[0] = '\0';
+        }
+        // iOS posts this asynchronously; MoviePlayer init sets isLoading=1 (0x21658c) only after
+        // initWithContentURL:/addObserver: return, so a synchronous post gets overwritten. Fire it next frame.
+        g_preload_player = g_movie_ctl = self;
+        r = (uint32_t)self;
     } else if (sel_is(sel, "init") ||
              sel_is(sel, "initWithFrame:") ||
              sel_is(sel, "initWithFrame:pixelFormat:") ||
              sel_is(sel, "initWithFrame:pixelFormat:depthFormat:preserveBackbuffer:") ||
              sel_is(sel, "initWithActivityIndicatorStyle:") ||
-             sel_is(sel, "initWithArray:") ||
              sel_is(sel, "initWithBytes:length:") ||
-             sel_is(sel, "initWithContentURL:") ||
              sel_is(sel, "initWithContentsOfFile:") ||
              sel_is(sel, "initWithContentsOfURL:") ||
              sel_is(sel, "initWithData:encoding:") ||
              sel_is(sel, "initWithFile:andFlipped:") ||
-             sel_is(sel, "initWithFormat:") ||
              sel_is(sel, "initWithRequest:delegate:") ||
-             sel_is(sel, "initWithString:") ||
-             sel_is(sel, "initWithTitle:message:delegate:cancelButtonTitle:otherButtonTitles:") ||
-             sel_is(sel, "initWithUTF8String:")) {
+             sel_is(sel, "initWithTitle:message:delegate:cancelButtonTitle:otherButtonTitles:")) {
         r = (uint32_t)self;
     }
     // Memory management & class introspection
@@ -656,11 +866,104 @@ static uint32_t objc_msgSend_system_impl(void *self, const char *sel, va_list ap
         r = (uint32_t)ns_new((const char *)a);
     } else if (sel_is(sel, "stringWithFormat:")) {
         r = (uint32_t)ns_format(ns_cstr((void *)a), ap_copy);
-    } else if (sel_is(sel, "stringByAppendingString:") || sel_is(sel, "stringByAppendingPathComponent:") ||
-               sel_is(sel, "stringByAppendingFormat:")) {
+    } else if (sel_is(sel, "stringByAppendingString:")) {
         char buf[512];
-        snprintf(buf, sizeof(buf), "%s/%s", ns_cstr(self), ns_cstr((void *)a));
+        snprintf(buf, sizeof(buf), "%s%s", ns_cstr(self), ns_cstr((void *)a));
         r = (uint32_t)ns_new(buf);
+    } else if (sel_is(sel, "stringByAppendingPathComponent:")) {
+        const char *s1 = ns_cstr(self);
+        const char *s2 = ns_cstr((void *)a);
+        size_t l1 = strlen(s1);
+        while (l1 > 0 && s1[l1 - 1] == '/') l1--;
+        while (*s2 == '/') s2++;
+        char buf[512];
+        snprintf(buf, sizeof(buf), "%.*s/%s", (int)l1, s1, s2);
+        r = (uint32_t)ns_new(buf);
+    } else if (sel_is(sel, "stringByAppendingFormat:")) {
+        ns_string *fmt_res = ns_format(ns_cstr((void *)a), ap_copy);
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "%s%s", ns_cstr(self), ns_cstr(fmt_res));
+        r = (uint32_t)ns_new(buf);
+    } else if (sel_is(sel, "pathForResource:ofType:")) {
+        const char *name = ns_cstr((void *)a);
+        const char *ext = ns_cstr(va_arg(ap_copy, void *));
+        while (name && *name == '/') name++;
+        char buf[512];
+        if (ext && ext[0]) {
+            snprintf(buf, sizeof(buf), "%s%s.%s", BUNDLE_PATH, name ? name : "", ext);
+        } else {
+            snprintf(buf, sizeof(buf), "%s%s", BUNDLE_PATH, name ? name : "");
+            SceIoStat st;
+            if (sceIoGetstat(buf, &st) < 0 && name && name[0]) {
+                static const char *try_exts[] = {"m4v", "mp4", "png", "tga", "pvr", "jpg"};
+                for (size_t i = 0; i < sizeof(try_exts) / sizeof(try_exts[0]); i++) {
+                    char try_buf[512];
+                    snprintf(try_buf, sizeof(try_buf), "%s%s.%s", BUNDLE_PATH, name, try_exts[i]);
+                    if (sceIoGetstat(try_buf, &st) >= 0) {
+                        snprintf(buf, sizeof(buf), "%s", try_buf);
+                        break;
+                    }
+                }
+            }
+        }
+        l_info("[OBJC] pathForResource:'%s' ofType:'%s' -> '%s'", name ? name : "", ext ? ext : "", buf);
+        r = (uint32_t)ns_new(buf);
+    } else if (sel_is(sel, "stringByReplacingOccurrencesOfString:withString:")) {
+        const char *orig = ns_cstr(self);
+        const char *target = ns_cstr((void *)a);
+        const char *replacement = ns_cstr(va_arg(ap_copy, void *));
+        if (!target || !target[0] || !strstr(orig, target)) {
+            r = (uint32_t)self;
+        } else {
+            char buf[1024];
+            size_t tlen = strlen(target);
+            size_t rlen = strlen(replacement);
+            const char *p = orig;
+            char *d = buf;
+            size_t rem = sizeof(buf) - 1;
+            while (*p && rem > 0) {
+                if (!strncmp(p, target, tlen) && rem >= rlen) {
+                    memcpy(d, replacement, rlen);
+                    d += rlen;
+                    rem -= rlen;
+                    p += tlen;
+                } else {
+                    *d++ = *p++;
+                    rem--;
+                }
+            }
+            *d = '\0';
+            r = (uint32_t)ns_new(buf);
+        }
+    } else if (sel_is(sel, "substringWithRange:")) {
+        const char *s = ns_cstr(self);
+        size_t slen = strlen(s);
+        size_t loc = (size_t)a;
+        size_t len = (size_t)va_arg(ap_copy, uint32_t);
+        if (loc >= slen) {
+            r = (uint32_t)ns_new("");
+        } else {
+            if (loc + len > slen) len = slen - loc;
+            char buf[512];
+            if (len >= sizeof(buf)) len = sizeof(buf) - 1;
+            memcpy(buf, s + loc, len);
+            buf[len] = '\0';
+            r = (uint32_t)ns_new(buf);
+        }
+    } else if (sel_is(sel, "substringToIndex:")) {
+        const char *s = ns_cstr(self);
+        size_t slen = strlen(s);
+        size_t to = (size_t)a < slen ? (size_t)a : slen;
+        char buf[512];
+        if (to >= sizeof(buf)) to = sizeof(buf) - 1;
+        memcpy(buf, s, to);
+        buf[to] = '\0';
+        r = (uint32_t)ns_new(buf);
+    } else if (sel_is(sel, "substringFromIndex:")) {
+        const char *s = ns_cstr(self);
+        size_t slen = strlen(s);
+        size_t from = (size_t)a < slen ? (size_t)a : slen;
+        r = (uint32_t)ns_new(s + from);
     } else if (sel_is(sel, "stringWithContentsOfFile:") || sel_is(sel, "stringWithContentsOfFile:encoding:error:")) {
         r = (uint32_t)ns_new("");
     } else if (sel_is(sel, "length")) {
@@ -729,30 +1032,148 @@ static uint32_t objc_msgSend_system_impl(void *self, const char *sel, va_list ap
         union { float f; uint32_t u; } flt = { 1.0f };
         r = flt.u;
     }
-    // Data, arrays, dictionaries
-    else if (sel_is(sel, "count") || sel_is(sel, "intValue") || sel_is(sel, "isMultitaskingSupported")) {
+    // Data, arrays, dictionaries, values
+    else if (sel_is(sel, "intValue") || sel_is(sel, "integerValue")) {
+        const char *s = ns_cstr(self);
+        r = s ? (uint32_t)atoi(s) : 0;
+    } else if (sel_is(sel, "boolValue")) {
+        const char *s = ns_cstr(self);
+        r = (s && (atoi(s) != 0 || !strcasecmp(s, "YES") || !strcasecmp(s, "true"))) ? 1 : 0;
+    } else if (sel_is(sel, "count")) {
+        ns_array *arr = (ns_array *)self;
+        r = (arr && arr->isa == (void *)&OBJC_CLASS_$_NSArray) ? arr->count : 0;
+    } else if (sel_is(sel, "isMultitaskingSupported")) {
         r = 0;
+    } else if (sel_is(sel, "arrayWithObjects:count:")) {
+        void **items = (void **)a;
+        uint32_t count = va_arg(ap_copy, uint32_t);
+        r = (uint32_t)ns_array_new(items, count);
+    } else if (sel_is(sel, "arrayWithObject:")) {
+        void *items[1] = { (void *)a };
+        r = (uint32_t)ns_array_new(items, 1);
+    } else if (sel_is(sel, "array")) {
+        r = (uint32_t)ns_array_new(NULL, 0);
+    } else if (sel_is(sel, "objectAtIndex:")) {
+        ns_array *arr = (ns_array *)self;
+        if (arr && arr->isa == (void *)&OBJC_CLASS_$_NSArray) {
+            r = (a < arr->count) ? (uint32_t)arr->items[a] : 0;
+        } else {
+            r = 0;
+        }
+    } else if (sel_is(sel, "firstObject")) {
+        ns_array *arr = (ns_array *)self;
+        r = (arr && arr->isa == (void *)&OBJC_CLASS_$_NSArray && arr->count > 0) ? (uint32_t)arr->items[0] : 0;
+    } else if (sel_is(sel, "lastObject")) {
+        ns_array *arr = (ns_array *)self;
+        r = (arr && arr->isa == (void *)&OBJC_CLASS_$_NSArray && arr->count > 0) ? (uint32_t)arr->items[arr->count - 1] : 0;
+    } else if (sel_is(sel, "countByEnumeratingWithState:objects:count:")) {
+        typedef struct {
+            unsigned long state;
+            void **itemsPtr;
+            unsigned long *mutationsPtr;
+            unsigned long extra[5];
+        } NSFastEnumerationState;
+        NSFastEnumerationState *st = (NSFastEnumerationState *)a;
+        ns_array *arr = (ns_array *)self;
+        if (st && st->state == 0 && arr && arr->isa == (void *)&OBJC_CLASS_$_NSArray) {
+            st->state = 1;
+            st->itemsPtr = arr->items;
+            static unsigned long mut = 0;
+            st->mutationsPtr = &mut;
+            r = arr->count;
+        } else {
+            r = 0;
+        }
+    } else if (sel_is(sel, "isAbsolutePath")) {
+        const char *s = ns_cstr(self);
+        r = (s && (s[0] == '/' || !strncmp(s, "ux0:", 4) || !strncmp(s, "ur0:", 4) || !strncmp(s, "app0:", 5))) ? 1 : 0;
+    } else if (sel_is(sel, "objectForKey:")) {
+        const char *k = ns_cstr((void *)a);
+        if (!k) {
+            r = 0;
+        } else if (!strcmp(k, "CFBundleVersion") || !strcmp(k, "CFBundleShortVersionString")) {
+            r = (uint32_t)ns_new("1.0.2");
+        } else if (!strcmp(k, "AppleLanguages")) {
+            int lang = SCE_SYSTEM_PARAM_LANG_ENGLISH_US;
+            sceAppUtilSystemParamGetInt(SCE_SYSTEM_PARAM_ID_LANG, &lang);
+            const char *lang_code = "en";
+            switch (lang) {
+            case SCE_SYSTEM_PARAM_LANG_JAPANESE:    lang_code = "ja"; break;
+            case SCE_SYSTEM_PARAM_LANG_FRENCH:      lang_code = "fr"; break;
+            case SCE_SYSTEM_PARAM_LANG_SPANISH:     lang_code = "es"; break;
+            case SCE_SYSTEM_PARAM_LANG_GERMAN:      lang_code = "de"; break;
+            case SCE_SYSTEM_PARAM_LANG_ITALIAN:     lang_code = "it"; break;
+            case SCE_SYSTEM_PARAM_LANG_KOREAN:      lang_code = "kr"; break;
+            case SCE_SYSTEM_PARAM_LANG_CHINESE_T:   lang_code = "zh-Hant"; break;
+            case SCE_SYSTEM_PARAM_LANG_CHINESE_S:   lang_code = "zh-Hans"; break;
+            case SCE_SYSTEM_PARAM_LANG_ENGLISH_US:
+            case SCE_SYSTEM_PARAM_LANG_ENGLISH_GB:
+            default:                                lang_code = "en"; break;
+            }
+            l_info("[OBJC] NSUserDefaults objectForKey:AppleLanguages -> '%s'", lang_code);
+            void *item = ns_new(lang_code);
+            r = (uint32_t)ns_array_new(&item, 1);
+        } else {
+            r = ret_obj();
+        }
+    } else if (sel_is(sel, "nextObject")) {
+        r = 0;
+    } else if (sel_is(sel, "enumeratorAtPath:")) {
+        r = ret_obj();
     } else if (sel_is(sel, "data") || sel_is(sel, "bytes")) {
         r = (uint32_t)dummy_obj;
+    } else if (sel_is(sel, "fileURLWithPath:") || sel_is(sel, "URLWithString:")) {
+        const char *p = ns_cstr((void *)a);
+        r = (uint32_t)ns_new(p ? p : "");
+    } else if (sel_is(sel, "absoluteString")) {
+        r = (uint32_t)self;
     } else if (sel_is(sel, "dictionaryWithObjectsAndKeys:") ||
                sel_is(sel, "componentsSeparatedByString:") ||
                sel_is(sel, "numberWithBool:") ||
                sel_is(sel, "imageWithContentsOfFile:") ||
                sel_is(sel, "imageWithData:") ||
-               sel_is(sel, "fileURLWithPath:") ||
-               sel_is(sel, "URLWithString:") ||
                sel_is(sel, "requestWithURL:") ||
-               sel_is(sel, "requestWithURL:cachePolicy:timeoutInterval:")) {
+               sel_is(sel, "requestWithURL:cachePolicy:timeoutInterval:") ||
+               sel_is(sel, "playlistsQuery") ||
+               sel_is(sel, "songsQuery") ||
+               sel_is(sel, "albumsQuery") ||
+               sel_is(sel, "artistsQuery") ||
+               sel_is(sel, "items") ||
+               sel_is(sel, "collections")) {
         r = ret_obj();
-    } else if (sel_is(sel, "absoluteString")) {
-        r = (uint32_t)ns_new("");
     } else if (sel_is(sel, "writeToFile:atomically:") ||
-               sel_is(sel, "writeToFile:atomically:encoding:error:") ||
-               sel_is(sel, "copyItemAtPath:toPath:error:") ||
-               sel_is(sel, "createDirectoryAtPath:attributes:") ||
-               sel_is(sel, "removeItemAtPath:error:") ||
-               sel_is(sel, "fileExistsAtPath:")) {
+               sel_is(sel, "writeToFile:atomically:encoding:error:")) {
+        const char *path = ns_cstr((void *)a);
+        char real[512];
+        darwin_path(path, real, sizeof(real));
+        const char *content = ns_cstr(self);
+        FILE *f = fopen(real, "wb");
+        if (f) {
+            if (content && content[0]) fputs(content, f);
+            fclose(f);
+            r = 1;
+        } else {
+            r = 0;
+        }
+    } else if (sel_is(sel, "copyItemAtPath:toPath:error:")) {
         r = 1;
+    } else if (sel_is(sel, "createDirectoryAtPath:attributes:") ||
+               sel_is(sel, "createDirectoryAtPath:withIntermediateDirectories:attributes:error:")) {
+        const char *path = ns_cstr((void *)a);
+        char real[512];
+        darwin_path(path, real, sizeof(real));
+        r = (sceIoMkdir(real, 0777) >= 0 || errno == EEXIST) ? 1 : 0;
+    } else if (sel_is(sel, "removeItemAtPath:error:")) {
+        const char *path = ns_cstr((void *)a);
+        char real[512];
+        darwin_path(path, real, sizeof(real));
+        r = (remove(real) == 0) ? 1 : 0;
+    } else if (sel_is(sel, "fileExistsAtPath:")) {
+        const char *path = ns_cstr((void *)a);
+        char real[512];
+        darwin_path(path, real, sizeof(real));
+        SceIoStat st;
+        r = (sceIoGetstat(real, &st) >= 0) ? 1 : 0;
     }
     // IME
     else if (sel_is(sel, "textInputOpen:")) {
@@ -767,6 +1188,101 @@ static uint32_t objc_msgSend_system_impl(void *self, const char *sel, va_list ap
         r = 0;
     } else if (sel_is(sel, "isMemberOfClass:")) {
         r = 1;
+    }
+    // Notification Center Observers
+    else if (sel_is(sel, "addObserver:selector:name:object:")) {
+        void *obs = (void *)a;
+        const char *s = (const char *)va_arg(ap_copy, uint32_t);
+        void *n = (void *)va_arg(ap_copy, uint32_t);
+        void *obj = (void *)va_arg(ap_copy, uint32_t);
+        const char *notif_name = ns_cstr(n);
+        if (obs && s) {
+            pthread_mutex_lock(&obs_mtx);
+            if (nobservers < 64) {
+                observer_t *o = &observers[nobservers++];
+                o->observer = obs;
+                o->sel = s;
+                o->object = obj;
+                snprintf(o->name, sizeof(o->name), "%s", notif_name ? notif_name : "");
+                l_info("[OBJC] NSNotificationCenter: observer %p sel '%s' observes '%s'", obs, s, o->name);
+            }
+            pthread_mutex_unlock(&obs_mtx);
+        }
+        r = 0;
+    } else if (sel_is(sel, "removeObserver:name:object:")) {
+        void *obs = (void *)a;
+        void *n = (void *)va_arg(ap_copy, uint32_t);
+        const char *notif_name = ns_cstr(n);
+        pthread_mutex_lock(&obs_mtx);
+        for (int i = 0; i < nobservers; i++) {
+            if (observers[i].observer == obs && (!notif_name || !strcmp(observers[i].name, notif_name))) {
+                observers[i] = observers[--nobservers];
+                i--;
+            }
+        }
+        pthread_mutex_unlock(&obs_mtx);
+        r = 0;
+    } else if (sel_is(sel, "removeObserver:")) {
+        void *obs = (void *)a;
+        pthread_mutex_lock(&obs_mtx);
+        for (int i = 0; i < nobservers; i++) {
+            if (observers[i].observer == obs) {
+                observers[i] = observers[--nobservers];
+                i--;
+            }
+        }
+        pthread_mutex_unlock(&obs_mtx);
+        r = 0;
+    } else if (sel_is(sel, "postNotificationName:object:") ||
+               sel_is(sel, "postNotificationName:object:userInfo:")) {
+        const char *n = ns_cstr((void *)a);
+        void *obj = (void *)va_arg(ap_copy, uint32_t);
+        d_post_notification(n, obj);
+        r = 0;
+    }
+    // Movie Player Controls
+    else if (sel_is(sel, "moviePlayer")) {
+        r = (uint32_t)self;
+    } else if (sel_is(sel, "view") && self == g_movie_ctl && g_movie_path[0]) {
+        // Only before the first play: stopMovie: also calls [player view] (removeFromSuperview), which replayed it.
+        // iOS 3.2+ autoplay: MoviePlayer playMovie (0x216070) only adds [player view] and never sends play;
+        // it sets isMoviePlaying=1 afterwards, so start playback next frame.
+        g_autoplay_player = self;
+        r = 0;
+    } else if (sel_is(sel, "play")) {
+        if (g_movie_path[0]) {
+            l_info("[VIDEO] MPMoviePlayerController play: '%s'", g_movie_path);
+            video_play(g_movie_path);
+            g_movie_path[0] = '\0';
+        } else {
+            char trailer[256];
+            snprintf(trailer, sizeof(trailer), "%sHoS_trailer.m4v", BUNDLE_PATH);
+            SceIoStat st;
+            if (sceIoGetstat(trailer, &st) >= 0) {
+                l_info("[VIDEO] MPMoviePlayerController play fallback trailer: '%s'", trailer);
+                video_play(trailer);
+            }
+        }
+        d_post_notification("MPMoviePlayerPlaybackDidFinishNotification", self);
+        void **mp_global = (void **)(MACHO_SLIDE + 0x0035a724);
+        if (mp_global && *mp_global) {
+            uint8_t *is_playing = (uint8_t *)*mp_global + 13;
+            *is_playing = 0;
+        }
+        *(uint8_t *)(MACHO_SLIDE + 0x0034df40) = 0;
+        *(uint8_t *)(MACHO_SLIDE + 0x0035a728) = 0;
+        r = 0;
+    } else if (sel_is(sel, "stop")) {
+        g_movie_path[0] = '\0';
+        d_post_notification("MPMoviePlayerPlaybackDidFinishNotification", self);
+        void **mp_global = (void **)(MACHO_SLIDE + 0x0035a724);
+        if (mp_global && *mp_global) {
+            uint8_t *is_playing = (uint8_t *)*mp_global + 13;
+            *is_playing = 0;
+        }
+        *(uint8_t *)(MACHO_SLIDE + 0x0034df40) = 0;
+        *(uint8_t *)(MACHO_SLIDE + 0x0035a728) = 0;
+        r = 0;
     }
     // No-op setters / helpers that return 0
     else if (sel_is(sel, "setIdleTimerDisabled:") ||
@@ -787,9 +1303,6 @@ static uint32_t objc_msgSend_system_impl(void *self, const char *sel, va_list ap
              sel_is(sel, "beginGeneratingLibraryChangeNotifications") ||
              sel_is(sel, "beginGeneratingPlaybackNotifications") ||
              sel_is(sel, "endGeneratingPlaybackNotifications") ||
-             sel_is(sel, "addObserver:selector:name:object:") ||
-             sel_is(sel, "removeObserver:name:object:") ||
-             sel_is(sel, "removeObserver:") ||
              sel_is(sel, "setDrawableProperties:") ||
              sel_is(sel, "setOpaque:") ||
              sel_is(sel, "setFrame:") ||
@@ -836,12 +1349,25 @@ static uint32_t objc_msgSend_system_impl(void *self, const char *sel, va_list ap
              sel_is(sel, "openURL:") ||
              sel_is(sel, "loadHTMLString:baseURL:") ||
              sel_is(sel, "loadRequest:") ||
-             sel_is(sel, "stop") ||
              sel_is(sel, "pause") ||
-             sel_is(sel, "play") ||
-             sel_is(sel, "invalidate") ||
-             sel_is(sel, "detachNewThreadSelector:toTarget:withObject:") ||
-             sel_is(sel, "performSelectorOnMainThread:withObject:waitUntilDone:")) {
+             sel_is(sel, "invalidate")) {
+        r = 0;
+    } else if (sel_is(sel, "performSelectorOnMainThread:withObject:waitUntilDone:")) {
+        // HOS2 game thread drives loadMovie:/startMovie:/stopMovie: on AppController this way and waits for
+        // the movie to end. Run it synchronously on the caller: it owns the GL context video_play draws with.
+        const char *target_sel = (const char *)a;
+        static const char *last_sel; // the game thread repeats stopMovie: every frame on the menu
+        if (target_sel != last_sel)
+            l_info("[OBJC] performSelectorOnMainThread:%s", target_sel);
+        last_sel = target_sel;
+        // "Más juegos" (Gameloft IGP web store): online only; running it hung the game thread (Run 42).
+        if (!strcmp(target_sel, "startIGP"))
+            r = 0;
+        else
+            r = objc_msgSend(self, target_sel, va_arg(ap_copy, uint32_t));
+    } else if (sel_is(sel, "detachNewThreadSelector:toTarget:withObject:")) {
+        // Only IGP / network uploads (startUpdateHTML, saveAllResToDocumentsFolder, sendInfo): kept offline.
+        l_info("[OBJC] detachNewThreadSelector:%s skipped (offline)", (const char *)a);
         r = 0;
     } else {
         log_unknown(self, sel);
@@ -875,13 +1401,22 @@ static void *d_NSClassFromString(const void *name) {
     return objc_find_class(ns_cstr(name));
 }
 
-static void *d_NSHomeDirectory(void) { return ns_new(DOCS_PATH); }
+static void *d_NSHomeDirectory(void) {
+    char path[256];
+    snprintf(path, sizeof(path), "%s", DOCS_PATH);
+    size_t len = strlen(path);
+    if (len > 0 && path[len - 1] == '/') path[len - 1] = '\0';
+    return ns_new(path);
+}
 
 static void *d_NSSearchPathForDirectoriesInDomains(int dir, int mask, int expand) {
     (void)dir; (void)mask; (void)expand;
-    static void *docs_arr[4];
-    docs_arr[0] = ns_new(DOCS_PATH);
-    return docs_arr;
+    char path[256];
+    snprintf(path, sizeof(path), "%s", DOCS_PATH);
+    size_t len = strlen(path);
+    if (len > 0 && path[len - 1] == '/') path[len - 1] = '\0';
+    void *item = ns_new(path);
+    return ns_array_new(&item, 1);
 }
 
 SOFTFP static void d_UIGraphicsBeginImageContext(CGSize size) { (void)size; }
@@ -945,16 +1480,11 @@ static int d_UIApplicationMain(int argc, char *argv[], void *principal, void *de
 static uint32_t objc_msgSend_impl(void *self, const char *sel, va_list ap) {
     if (!self || !sel) return 0;
 
-    // Check if self is a guest class instance or class object
+    // Dispatch through isa: an instance finds its class (instance methods), a class object finds its
+    // metaclass (class methods). Host dummies and small values have no guest isa.
     void *target_cls = NULL;
     uint32_t self_val = (uint32_t)self;
-    for (int i = 0; i < registered_class_count; i++) {
-        if (registered_classes[i].cls_ptr == self_val) {
-            target_cls = (void *)self_val;
-            break;
-        }
-    }
-    if (!target_cls && self_val >= 0x10000 && (self_val & 3) == 0) {
+    if (self_val >= 0x10000 && (self_val & 3) == 0) {
         uint32_t isa_val = *(uint32_t *)self;
         for (int i = 0; i < registered_class_count; i++) {
             if (registered_classes[i].cls_ptr == isa_val) {
@@ -987,7 +1517,10 @@ static uint32_t objc_msgSend(void *self, const char *sel, ...) {
 static void objc_msgSend_stret(float *ret, void *self, const char *sel, ...) {
     va_list ap;
     va_start(ap, sel);
-    if (sel_is(sel, "sizeWithFont:")) {
+    if (sel_is(sel, "locationInView:") && self && *(void **)self == ui_touch_isa) {
+        ret[0] = ((ui_touch *)self)->x;
+        ret[1] = ((ui_touch *)self)->y;
+    } else if (sel_is(sel, "sizeWithFont:")) {
         ui_font *f = va_arg(ap, ui_font *);
         int size = f ? f->size : 14;
         ret[0] = text_width(size, ns_cstr(self));

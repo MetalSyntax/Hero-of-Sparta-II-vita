@@ -42,7 +42,7 @@ CPU_SUBTYPE_ARM_V7S = 11
 
 def parse(path, preferred_arch=None):
     with open(path, 'rb') as f:
-        raw_data = f.read()
+        raw_data = bytearray(f.read())
 
     slice_offset = 0
     slice_size = len(raw_data)
@@ -91,7 +91,7 @@ def parse(path, preferred_arch=None):
         slice_offset = chosen[3]
         slice_size = chosen[4]
         detected_arch = chosen[0]
-        d = raw_data[slice_offset:slice_offset + slice_size]
+        d = bytearray(raw_data[slice_offset:slice_offset + slice_size])
     else:
         d = raw_data
 
@@ -136,7 +136,71 @@ def parse(path, preferred_arch=None):
             cryptoff, cryptsize, cryptid = struct.unpack_from('<3I', d, off + 8)
         off += size
 
-    return d, segs, sects, symtab, dysym, detected_arch, cryptid
+    return raw_data, d, segs, sects, symtab, dysym, detected_arch, cryptid
+
+
+def patch_vfp_vector_blocks(buf, text_sec):
+    K_VFP_NEON = {
+        0xee24ca00: 0xf3a4c940, # vmul.f32 q6, q2, d0[0]
+        0xee06ca20: 0xf3a6c160, # vmla.f32 q6, q3, d0[1]
+        0xee08ca01: 0xf3a8c141, # vmla.f32 q6, q4, d1[0]
+        0xee0aca21: 0xf3aac161, # vmla.f32 q6, q5, d1[1]
+        0xee24ea02: 0xf3a4e942, # vmul.f32 q7, q2, d2[0]
+        0xee06ea22: 0xf3a6e162, # vmla.f32 q7, q3, d2[1]
+        0xee08ea03: 0xf3a8e143, # vmla.f32 q7, q4, d3[0]
+        0xee0aea23: 0xf3aae163, # vmla.f32 q7, q5, d3[1]
+        0xee3cca0a: 0xf20ccd4a, # vadd.f32 q6, q6, q5
+    }
+    NOP = 0xe1a00000
+
+    toff = text_sec['fileoff']
+    tsize = text_sec['size']
+    nwords = tsize // 4
+
+    blocks_patched = 0
+    instrs_patched = 0
+
+    i = 3
+    while i < nwords - 4:
+        w = struct.unpack_from('<I', buf, toff + i * 4)[0]
+        if (w & 0x0fff0fff) != 0x0ee10a10:
+            i += 1
+            continue
+        w_prev = struct.unpack_from('<I', buf, toff + (i - 1) * 4)[0]
+        if (w_prev & 0x0fef0000) != 0x03800000:
+            i += 1
+            continue
+        enter_idx = i
+        exit_idx = None
+        for j in range(enter_idx + 1, min(nwords, enter_idx + 64)):
+            wj = struct.unpack_from('<I', buf, toff + j * 4)[0]
+            if (wj & 0x0fff0fff) == 0x0ee10a10:
+                exit_idx = j
+                break
+        if not exit_idx:
+            i += 1
+            continue
+        for p in range(enter_idx - 3, enter_idx + 1):
+            struct.pack_into('<I', buf, toff + p * 4, NOP)
+            instrs_patched += 1
+        exit_vmrs_idx = exit_idx - 2
+        for p in range(exit_idx - 1, max(enter_idx, exit_idx - 5), -1):
+            wp = struct.unpack_from('<I', buf, toff + p * 4)[0]
+            if wp == 0xeef10a10:
+                exit_vmrs_idx = p
+                break
+        for p in range(exit_vmrs_idx, exit_idx + 1):
+            struct.pack_into('<I', buf, toff + p * 4, NOP)
+            instrs_patched += 1
+        for p in range(enter_idx + 1, exit_vmrs_idx):
+            inst = struct.unpack_from('<I', buf, toff + p * 4)[0]
+            if inst in K_VFP_NEON:
+                struct.pack_into('<I', buf, toff + p * 4, K_VFP_NEON[inst])
+                instrs_patched += 1
+        blocks_patched += 1
+        i = exit_idx + 1
+
+    return blocks_patched, instrs_patched
 
 
 def main():
@@ -148,7 +212,7 @@ def main():
     report = sys.argv[sys.argv.index('--report') + 1] if '--report' in sys.argv else None
     preferred_arch = sys.argv[sys.argv.index('--arch') + 1] if '--arch' in sys.argv else None
 
-    d, segs, sects, symtab_cmd, dysym, detected_arch, cryptid = parse(src, preferred_arch)
+    raw_data, d, segs, sects, symtab_cmd, dysym, detected_arch, cryptid = parse(src, preferred_arch)
 
     print(f"[*] Binario: {src}")
     print(f"[*] Arquitectura Mach-O: {detected_arch}")
@@ -190,6 +254,12 @@ def main():
     if not text_sec:
         raise RuntimeError("No se encontró sección __TEXT.__text")
 
+    vfp_blocks, vfp_instrs = patch_vfp_vector_blocks(d, text_sec)
+    if vfp_blocks > 0:
+        with open(src, 'wb') as f:
+            f.write(raw_data)
+        print(f"[+] Parcheados {vfp_blocks} bloques vectoriales VFPv2 ({vfp_instrs} instrucciones) -> ARM NEON SIMD en {src}")
+
     code_bytes = d[text_sec['fileoff']:text_sec['fileoff'] + text_sec['size']]
 
     # Function prologues and call targets in __text
@@ -207,8 +277,12 @@ def main():
             target = va + 8 + (imm24 << 2)
             if text_sec['addr'] <= target < text_sec['addr'] + text_sec['size']:
                 funcs.add(target)
+        # first instruction after clang's mov r0, r0 alignment padding (HOS2 0x21aa90: called only
+        # through a pointer, no push/bl, so nothing else marks it and its literals were left unrebased)
+        elif i >= 4 and w != 0xE1A00000 and struct.unpack_from('<I', code_bytes, i - 4)[0] == 0xE1A00000:
+            funcs.add(va)
         # bx lr leaf function
-        elif (w & 0x0FFFFFFF) == 0x012FFF1E:
+        if (w & 0x0FFFFFFF) == 0x012FFF1E:
             funcs.add(va)
             if i >= 4:
                 prev = struct.unpack_from('<I', code_bytes, i - 4)[0]
@@ -248,15 +322,17 @@ def main():
                 # Track register copy: mov cur_reg, new_reg
                 if (nw & 0x0FE0000F) == (0x01A00000 | cur_reg):
                     cur_reg = (nw >> 12) & 0xF
-                # ADD reg, pc, cur_reg (or ADD reg, cur_reg, pc)
-                if (nw & 0x0DE00000) in (0x00800000, 0x00400000): # ADD/SUB
+                # ADD reg, pc, cur_reg (or ADD reg, cur_reg, pc). Register form only: an immediate's low
+                # nibble is not rm (HOS2 0x205060 add r9, r2, #0xff hid the __nl_symbol_ptr literal 0x204b90).
+                if (nw & 0x0FE00010) in (0x00800000, 0x00400000): # ADD/SUB
                     rn = (nw >> 16) & 0xF
                     rm = nw & 0xF
                     if (rn == 15 and rm == cur_reg) or (rn == cur_reg and rm == 15):
                         pc_rel_targets.add(tva)
                         break
-                # LDR reg, [pc, +/-cur_reg]
-                if (nw & 0x0F200000) == 0x07000000:
+                # LDR reg, [pc, +/-cur_reg], unshifted and not into pc: ldrls pc, [pc, r3, lsl #2] is a switch
+                # jump (HOS2 0x223e98), which hid the __nl_symbol_ptr literal 0x2246a8.
+                if (nw & 0x0F200FF0) == 0x07000000 and (nw >> 12) & 0xF != 15:
                     rn = (nw >> 16) & 0xF
                     rm = nw & 0xF
                     if rn == 15 and rm == cur_reg:
@@ -265,6 +341,99 @@ def main():
                 # Function return or unconditional branch ends basic block
                 if (nw & 0x0FFFFFFF) == 0x012FFF1E or (nw & 0x0FE00000) == 0x08A00000:
                     break
+
+    # Allocator call targets: malloc/calloc/realloc stubs plus thin wrappers that call them
+    # within their first instructions (e.g. HOS2 0x18d7c0 = calloc(n, 1) + memset).
+    alloc_targets = set()
+    stub_sec = next((s for s in sects if s['type'] == 8), None)  # S_SYMBOL_STUBS
+    if stub_sec and dysym:
+        for k in range(stub_sec['size'] // 12):
+            idx = struct.unpack_from('<I', d, dysym[12] + (stub_sec['r1'] + k) * 4)[0]
+            if idx < len(names) and names[idx] in ('_malloc', '_calloc', '_realloc'):
+                alloc_targets.add(stub_sec['addr'] + k * 12)
+
+    def bl_target(va, w):
+        imm24 = w & 0x00FFFFFF
+        if imm24 & 0x00800000:
+            imm24 -= 0x01000000
+        return va + 8 + (imm24 << 2)
+
+    for f in list(funcs):
+        for k in range(6):
+            fi = f + k * 4 - text_sec['addr']
+            if not 0 <= fi < len(code_bytes) - 3:
+                break
+            fw = struct.unpack_from('<I', code_bytes, fi)[0]
+            if (fw & 0x0F000000) == 0x0B000000 and bl_target(f + k * 4, fw) in alloc_targets:
+                alloc_targets.add(f)
+                break
+
+    # Literal pools also hold plain numbers that happen to equal a function address in low
+    # __text (HOS2: 40000 = 0x9c40 is both a calloc size and a function start). Follow the
+    # loaded register to its first use: arithmetic or an allocator size argument means
+    # the slot is a number, never a pointer.
+    def literal_is_number(i, rd):
+        regs = {rd}
+        for k in range(1, 24):
+            j = i + k * 4
+            if j > len(code_bytes) - 4:
+                return False
+            va = text_sec['addr'] + j
+            w = struct.unpack_from('<I', code_bytes, j)[0]
+            cond = w >> 28
+            if cond == 0xF:
+                return False
+            if (w & 0x0E000000) == 0x0A000000:  # b / bl
+                if w & 0x01000000:
+                    if regs & {0, 1, 2, 3}:
+                        return bl_target(va, w) in alloc_targets and bool(regs & {0, 1})
+                    continue
+                if cond == 0xE:
+                    return False
+                continue
+            if (w & 0x0FFFFFD0) == 0x012FFF10:  # bx / blx reg
+                return False
+            if (w & 0x0FC000F0) == 0x00000090 or (w & 0x0F8000F0) == 0x00800090:  # mul/mla/umull...
+                if {w & 0xF, (w >> 8) & 0xF} & regs:
+                    return True
+                continue
+            if (w & 0x0E000090) == 0x00000090 or (w & 0x0C000000) == 0x04000000:  # load/store
+                rn, rt = (w >> 16) & 0xF, (w >> 12) & 0xF
+                if rn in regs or (not (w & 0x00100000) and rt in regs):
+                    return False  # used as address, or stored to memory: keep pointer semantics
+                regs.discard(rt)
+                if not regs:
+                    return False
+                continue
+            if (w & 0x0C000000) == 0:  # data processing
+                op, imm = (w >> 21) & 0xF, (w >> 25) & 1
+                rn, dst = (w >> 16) & 0xF, (w >> 12) & 0xF
+                srcs = set() if op in (13, 15) else {rn}
+                if not imm:
+                    srcs.add(w & 0xF)
+                    if w & 0x10:
+                        srcs.add((w >> 8) & 0xF)
+                if srcs & regs:
+                    if op == 13 and not imm and (w & 0xFF0) == 0:  # mov rX, rD: follow the copy
+                        regs.add(dst)
+                        continue
+                    # cmp/cmn/tst/teq prove nothing: HOS2 0x2238b4 compares a callback against &func
+                    return op not in (8, 9, 10, 11)
+                if op not in (8, 9, 10, 11):  # tst/teq/cmp/cmn write nothing
+                    regs.discard(dst)
+                if not regs:
+                    return False
+                continue
+        return False
+
+    numeric_slots = set()
+    for i in range(0, len(code_bytes) - 3, 4):
+        w = struct.unpack_from('<I', code_bytes, i)[0]
+        if (w & 0x0E5F0000) == 0x041F0000 and (w & 0x00100000):
+            va = text_sec['addr'] + i
+            tva = va + 8 + (w & 0xFFF) if (w >> 23) & 1 else va + 8 - (w & 0xFFF)
+            if literal_is_number(i, (w >> 12) & 0xF):
+                numeric_slots.add(tva)
 
     rebase = set()
     stats = Counter()
@@ -295,6 +464,7 @@ def main():
                 imports[names[symnum]] += 1
 
     # 1. Relocate literal pools in __TEXT.__text
+    skipped_num = []
     for i in range(0, len(code_bytes) - 3, 4):
         va = text_sec['addr'] + i
         w = struct.unpack_from('<I', code_bytes, i)[0]
@@ -319,7 +489,10 @@ def main():
                     rebase.add(tva)
                     stats[('__text_lit', s['name'])] += 1
                 elif s['name'] == '__text':
-                    if (val & 3) == 0 and val in funcs:
+                    if tva in numeric_slots and val in funcs:
+                        stats[('__text_lit', 'func_skip_num')] += 1
+                        skipped_num.append((tva, val))
+                    elif (val & 3) == 0 and val in funcs:
                         rebase.add(tva)
                         stats[('__text_lit', 'func')] += 1
                 elif s['name'] in ('__const', '__gcc_except_tab'):
@@ -428,6 +601,8 @@ def main():
         f'Rebase: {len(rebase_sorted)} palabras -> {out}',
     ]
     lines += [f'  {sn:22} {k:15}: {n}' for (sn, k), n in sorted(stats.items())]
+    lines += [f'Literales numéricos que coinciden con una función (no reubicados): {len(set(skipped_num))}']
+    lines += [f'  slot {a:#08x} = {v:#x} ({v})' for a, v in sorted(set(skipped_num))]
     lines += [f'Imports dinámicos únicos: {len(imports)}']
     lines += [f'  {n}' for n in sorted(imports)]
 

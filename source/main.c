@@ -132,6 +132,7 @@ int main(int argc, char *argv[]) {
     // Main fallback event loop (presentation is driven by the game render thread via presentRenderbuffer:)
     for (;;) {
         input_poll();
+        objc_deliver_touches(touches, touch_count);
         ime_poll();
         patch_frame();
         sceKernelDelayThread(16000); // ~60 fps

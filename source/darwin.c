@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <locale.h>
+#include <malloc.h>
 #include <math.h>
 #include <psp2/io/stat.h>
 #include <psp2/kernel/processmgr.h>
@@ -29,6 +30,7 @@
 #include "imports.h"
 #include "log.h"
 #include "macho.h"
+#include "objc.h"
 #include "runetype.h"
 
 // ---------------------------------------------------------------- paths
@@ -36,8 +38,10 @@
 // Emulated working directory (Vita processes have none). HOS2 chdir()s to the bundle and
 // opens assets relative to it; the bundle is also the default.
 static char cwd[512] = BUNDLE_PATH;
+static pthread_mutex_t cwd_mtx = PTHREAD_MUTEX_INITIALIZER;
 
 static int is_device_path(const char *p) {
+    if (!p) return 0;
     return !strncmp(p, "ux0:", 4) || !strncmp(p, "ur0:", 4) || !strncmp(p, "app0:", 5);
 }
 
@@ -46,6 +50,11 @@ static int is_device_path(const char *p) {
 // "dir/../" is collapsed (sceIo does not resolve it): the game opens "<bundle>/../Documents/x",
 // and the iOS sandbox Documents/ folder is DOCS_PATH.
 const char *darwin_path(const char *in, char *out, size_t outlen) {
+    if (!out || outlen == 0) return "";
+    if (!in) {
+        out[0] = '\0';
+        return out;
+    }
     char tmp[512];
     if (is_device_path(in)) {
         snprintf(tmp, sizeof(tmp), "%s", in);
@@ -56,7 +65,9 @@ const char *darwin_path(const char *in, char *out, size_t outlen) {
     } else {
         while (in[0] == '.' && in[1] == '/')
             in += 2;
+        pthread_mutex_lock(&cwd_mtx);
         snprintf(tmp, sizeof(tmp), "%s%s", cwd, in);
+        pthread_mutex_unlock(&cwd_mtx);
     }
     for (char *p; (p = strstr(tmp, "/../"));) {
         char *q = p;
@@ -74,10 +85,14 @@ const char *darwin_path(const char *in, char *out, size_t outlen) {
 }
 
 static FILE *d_fopen(const char *path, const char *mode) {
+    if (!path) {
+        l_warn("fopen(NULL, %s) -> FAILED", mode ? mode : "(null)");
+        return NULL;
+    }
     char p[512];
     darwin_path(path, p, sizeof(p));
     FILE *f = fopen(p, mode);
-    if (!f && path && path[0] == '/') {
+    if (!f && path[0] == '/') {
         const char *rel = path;
         while (*rel == '/')
             rel++;
@@ -89,12 +104,25 @@ static FILE *d_fopen(const char *path, const char *mode) {
             return f;
         }
     }
-    if (!f) {
+    // Successful opens are not logged: ~800 sound files at boot, each line fflush'ed, added seconds of load time.
+    if (!f)
         l_warn("fopen(%s -> %s, %s) -> FAILED (errno %d)", path, p, mode, errno);
-    } else {
-        l_info("fopen(%s -> %s, %s) -> %p", path, p, mode, f);
-    }
     return f;
+}
+
+static int d_remove(const char *path) {
+    if (!path) return -1;
+    char p[512];
+    darwin_path(path, p, sizeof(p));
+    return remove(p);
+}
+
+static int d_rename(const char *old, const char *new) {
+    if (!old || !new) return -1;
+    char p_old[512], p_new[512];
+    darwin_path(old, p_old, sizeof(p_old));
+    darwin_path(new, p_new, sizeof(p_new));
+    return rename(p_old, p_new);
 }
 
 static int d_mkdir(const char *path, int mode) {
@@ -112,17 +140,255 @@ static int d_chdir(const char *path) {
         return -1;
     }
     size_t n = strlen(p);
+    pthread_mutex_lock(&cwd_mtx);
     snprintf(cwd, sizeof(cwd), "%s%s", p, n && p[n - 1] == '/' ? "" : "/");
+    pthread_mutex_unlock(&cwd_mtx);
     l_info("chdir(%s) -> %s", path, cwd);
     return 0;
 }
 
 static char *d_getcwd(char *buf, size_t size) {
+    pthread_mutex_lock(&cwd_mtx);
     snprintf(buf, size, "%s", cwd);
+    pthread_mutex_unlock(&cwd_mtx);
     size_t n = strlen(buf);
     if (n > 1 && buf[n - 1] == '/' && buf[n - 2] != ':')
         buf[n - 1] = 0;
     return buf;
+}
+
+// ---------------------------------------------------------------- guest heap accounting
+// Run 14 died on calloc(40000) == NULL with the 256 MB newlib heap exhausted during boot.
+// Log every 16 MB of heap growth (sbrk'ed arena) with the guest caller, and every failure,
+// so the run after names the allocation site eating the heap.
+extern struct mallinfo __malloc_current_mallinfo; // newlib: .arena = bytes obtained via sbrk
+static size_t heap_mark = 16 << 20;
+
+static void *heap_track(void *p, size_t n, void *lr, const char *what) {
+    uint32_t off = (uint32_t)lr - MACHO_SLIDE;
+    if (!p && n) {
+        struct mallinfo mi = mallinfo();
+        l_error("[MEM] %s(%u) FAILED from guest 0x%08X: arena %u KB, in use %u KB, free %u KB", what,
+                (unsigned)n, off, mi.arena >> 10, mi.uordblks >> 10, mi.fordblks >> 10);
+    } else if (__malloc_current_mallinfo.arena >= heap_mark) {
+        l_info("[MEM] heap arena %u MB after %s(%u) from guest 0x%08X", __malloc_current_mallinfo.arena >> 20,
+               what, (unsigned)n, off);
+        heap_mark = (__malloc_current_mallinfo.arena & ~((16u << 20) - 1)) + (16 << 20);
+    }
+    return p;
+}
+
+// Guest heap blocks get a redzone: RZ bytes of 0xFD after each block, checked on free and swept from gles_present,
+// overflows logged with the allocating caller. A live table records every block's size and allocating caller.
+//
+// Freed blocks are NOT returned to newlib right away. Run 47 proved the game draws from blocks it already freed
+// (3D mesh vtx/tc arrays, the 2D quad index buffer freed at 0x35F24): on iOS the freed memory keeps its contents and
+// the same-size alloc that usually follows hands the same block back, so the stale pointer keeps working there. On
+// newlib the block is reused by someone else at once -> garbage vertices (black wedges). So, like iOS:
+//  - free()/realloc() leave the old contents intact and park the block in a FIFO quarantine (Q_BYTES / Q_N);
+//  - gles.c calls heap_pin() for every array a draw uses: a freed block in use is pinned and never released.
+// ponytail: pinned blocks leak (logged as "[MEM] pinned"); if a level-load loop grows them, patch the guest freer.
+#define RZ 64
+#define RZ_BYTE 0xFD
+#define LIVE_BITS 21 // 2M slots (24 MB): live blocks plus up to Q_N quarantined ones
+#define LIVE_N (1u << LIVE_BITS)
+#define LEN_REPORTED 0x80000000u // overflow already logged
+#define LEN_FREED 0x40000000u    // guest freed it; held in quarantine
+#define LEN_PINNED 0x20000000u   // freed but still drawn from: never released
+#define LEN_MASK 0x1FFFFFFFu
+#define Q_BYTES (64u << 20)
+#define Q_N (1u << 19)
+static uintptr_t *live_tab;
+static uint32_t *live_len, *live_lr; // size | flags, guest caller (alloc; free once freed)
+static uint32_t live_cnt;
+static pthread_mutex_t live_mtx = PTHREAD_MUTEX_INITIALIZER;
+static void **qring;
+static uint32_t q_head, q_cnt, q_bytes, pin_cnt, pin_bytes;
+
+extern char ml_align_ret[];
+extern uint32_t ml_guest_lr;
+static inline uint32_t live_hash(uintptr_t p) { return ((uint32_t)p >> 3) * 2654435761u >> (32 - LIVE_BITS); }
+// Guest offset of a caller; calls that went through the stack-alignment bridge report the guest lr it saw.
+static inline uint32_t guest_off(void *lr) {
+    if (lr == (void *)ml_align_ret) lr = (void *)(uintptr_t)ml_guest_lr;
+    return (uint32_t)((uintptr_t)lr - MACHO_SLIDE);
+}
+
+// Table slot of p, or -1. Caller holds live_mtx.
+static int live_find(const void *p) {
+    if (!live_tab || !p) return -1;
+    uint32_t i = live_hash((uintptr_t)p);
+    while (live_tab[i] && live_tab[i] != (uintptr_t)p) i = (i + 1) & (LIVE_N - 1);
+    return live_tab[i] ? (int)i : -1;
+}
+
+static void live_add(void *p, size_t n, void *lr) {
+    if (!p) return;
+    memset((char *)p + n, RZ_BYTE, RZ);
+    pthread_mutex_lock(&live_mtx);
+    if (!live_tab) {
+        live_tab = calloc(LIVE_N, sizeof(*live_tab));
+        live_len = calloc(LIVE_N, sizeof(*live_len));
+        live_lr = calloc(LIVE_N, sizeof(*live_lr));
+        qring = calloc(Q_N, sizeof(*qring));
+    }
+    if (live_cnt < LIVE_N - LIVE_N / 8) {
+        uint32_t i = live_hash((uintptr_t)p);
+        while (live_tab[i] && live_tab[i] != (uintptr_t)p) i = (i + 1) & (LIVE_N - 1);
+        if (!live_tab[i]) live_tab[i] = (uintptr_t)p, live_cnt++;
+        live_len[i] = n, live_lr[i] = guest_off(lr);
+    } else {
+        static int full;
+        if (!full++) l_error("[MEM] live set full (%u blocks): free() checks degraded", (unsigned)live_cnt);
+    }
+    pthread_mutex_unlock(&live_mtx);
+}
+
+// Logs (once per block) if the guest wrote into the redzone of a block. Caller holds live_mtx.
+static void rz_check(uint32_t i, void *by) {
+    if (live_len[i] & (LEN_REPORTED | LEN_FREED)) return;
+    uint32_t len = live_len[i] & LEN_MASK;
+    const uint8_t *z = (const uint8_t *)live_tab[i] + len;
+    int last = -1;
+    for (int k = 0; k < RZ; k++)
+        if (z[k] != RZ_BYTE) last = k;
+    if (last < 0) return;
+    static int logged;
+    if (logged++ < 64)
+        l_error("[MEM] OVERFLOW: %u-byte block %p from guest 0x%08X written %d+ bytes past its end (seen at 0x%08X)",
+                (unsigned)len, (void *)live_tab[i], (unsigned)live_lr[i], last + 1, guest_off(by));
+    live_len[i] |= LEN_REPORTED;
+}
+
+// Drops slot i (linear probing, backward-shift delete). Caller holds live_mtx.
+static void live_remove(uint32_t i) {
+    live_cnt--;
+    for (uint32_t j = (i + 1) & (LIVE_N - 1); live_tab[j]; j = (j + 1) & (LIVE_N - 1)) {
+        uint32_t h = live_hash(live_tab[j]);
+        if (((j - h) & (LIVE_N - 1)) >= ((j - i) & (LIVE_N - 1)))
+            live_tab[i] = live_tab[j], live_len[i] = live_len[j], live_lr[i] = live_lr[j], i = j;
+    }
+    live_tab[i] = 0;
+}
+
+// guest free(): checks the redzone, marks the block freed (contents untouched) and queues it. 0 if p is not live.
+static int live_free(void *p, void *by) {
+    pthread_mutex_lock(&live_mtx);
+    int i = live_find(p);
+    if (i < 0 || (live_len[i] & LEN_FREED)) {
+        pthread_mutex_unlock(&live_mtx);
+        return 0;
+    }
+    rz_check(i, by);
+    uint32_t len = live_len[i] & LEN_MASK;
+    live_len[i] |= LEN_FREED, live_lr[i] = guest_off(by);
+    while (q_cnt && (q_cnt == Q_N || q_bytes + len > Q_BYTES)) { // release the oldest unpinned blocks
+        void *o = qring[(q_head - q_cnt) & (Q_N - 1)];
+        q_cnt--;
+        int k = live_find(o);
+        if (k < 0) continue;
+        q_bytes -= live_len[k] & LEN_MASK;
+        if (live_len[k] & LEN_PINNED) continue;
+        live_remove(k);
+        free(o);
+    }
+    qring[q_head++ & (Q_N - 1)] = p, q_cnt++, q_bytes += len;
+    pthread_mutex_unlock(&live_mtx);
+    return 1;
+}
+
+// A draw uses p: if it is a freed block, keep it forever (iOS semantics, see above).
+void heap_pin(const void *p) {
+    pthread_mutex_lock(&live_mtx);
+    int i = live_find(p);
+    if (i >= 0 && (live_len[i] & (LEN_FREED | LEN_PINNED)) == LEN_FREED) {
+        live_len[i] |= LEN_PINNED;
+        pin_cnt++, pin_bytes += live_len[i] & LEN_MASK;
+        if (pin_cnt <= 64 || !(pin_cnt & 255))
+            l_warn("[MEM] pinned freed block %p (%u bytes, freed by guest 0x%06X) still used by a draw; total %u blocks / %u KB",
+                   p, (unsigned)(live_len[i] & LEN_MASK), (unsigned)live_lr[i], (unsigned)pin_cnt, (unsigned)(pin_bytes >> 10));
+    }
+    pthread_mutex_unlock(&live_mtx);
+}
+
+// Checks every live block's redzone (long-lived blocks such as meshes are never freed mid-level).
+void heap_redzone_sweep(void) {
+    pthread_mutex_lock(&live_mtx);
+    if (live_tab)
+        for (uint32_t i = 0; i < LIVE_N; i++)
+            if (live_tab[i]) rz_check(i, __builtin_return_address(0));
+    pthread_mutex_unlock(&live_mtx);
+}
+
+// Diagnostic: formats the guest block containing p as "start+off/len@caller" with FREED/PINNED status
+// (caller = allocator, or freer once freed). Linear scan: only for logged draws.
+void heap_describe(const void *p, char *out, int n) {
+    uintptr_t a = (uintptr_t)p, best = 0;
+    uint32_t bl = 0, blr = 0;
+    pthread_mutex_lock(&live_mtx);
+    if (live_tab)
+        for (uint32_t i = 0; i < LIVE_N; i++) {
+            uintptr_t b = live_tab[i];
+            if (b && b <= a && b > best && a < b + (live_len[i] & LEN_MASK) + RZ)
+                best = b, bl = live_len[i], blr = live_lr[i];
+        }
+    pthread_mutex_unlock(&live_mtx);
+    if (best)
+        snprintf(out, n, "%s%p+%u/%u@0x%06X", bl & LEN_PINNED ? "PINNED " : bl & LEN_FREED ? "FREED " : "", (void *)best,
+                 (unsigned)(a - best), (unsigned)(bl & LEN_MASK), (unsigned)blr);
+    else
+        snprintf(out, n, "%p(not guest heap)", p);
+}
+
+static void bad_free(void *p, void *lr, const char *what) {
+    static int logged;
+    if (logged++ < 64)
+        l_error("[MEM] %s(%p) of a block that is not live (double free?) from guest 0x%08X -> skipped", what, p,
+                guest_off(lr));
+}
+
+static void *rz_malloc(size_t n, void *lr, const char *what) {
+    void *p = heap_track(malloc(n + RZ), n, lr, what);
+    live_add(p, n, lr);
+    return p;
+}
+static void *d_malloc(size_t n) { return rz_malloc(n, __builtin_return_address(0), "malloc"); }
+static void *d_calloc(size_t c, size_t n) {
+    void *lr = __builtin_return_address(0), *p = heap_track(calloc(1, c * n + RZ), c * n, lr, "calloc");
+    live_add(p, c * n, lr);
+    return p;
+}
+static void *d_realloc(void *p, size_t n) {
+    void *lr = __builtin_return_address(0);
+    if (!p) return rz_malloc(n, lr, "realloc");
+    pthread_mutex_lock(&live_mtx);
+    int i = live_find(p);
+    int live = i >= 0 && !(live_len[i] & LEN_FREED);
+    uint32_t len = live ? live_len[i] & LEN_MASK : 0;
+    pthread_mutex_unlock(&live_mtx);
+    if (!live) {
+        bad_free(p, lr, "realloc");
+        return rz_malloc(n, lr, "realloc"); // stale block: give a fresh one rather than resizing memory someone else owns
+    }
+    // Always move: the old block goes through the quarantine like a free(), so stale pointers keep its data.
+    void *r = rz_malloc(n, lr, "realloc");
+    if (!r) return NULL; // C semantics: old block stays valid
+    memcpy(r, p, len < n ? len : n);
+    live_free(p, lr);
+    return r;
+}
+static void d_free(void *p) {
+    if (!p) return;
+    if (!live_free(p, __builtin_return_address(0)))
+        bad_free(p, __builtin_return_address(0), "free");
+}
+static char *d_strdup(const char *s) {
+    if (!s) s = "";
+    size_t n = strlen(s) + 1;
+    char *p = malloc(n + RZ);
+    if (p) memcpy(p, s, n);
+    live_add(p, n, __builtin_return_address(0));
+    return p;
 }
 
 // ---------------------------------------------------------------- stdio / errno / _chk
@@ -131,8 +397,45 @@ static FILE *d_stderrp, *d_stdinp;
 
 static int *d___error(void) { return &errno; }
 
-static void *d___memcpy_chk(void *d, const void *s, size_t n, size_t dn) { return memcpy(d, s, n); }
-static char *d___strcpy_chk(char *d, const char *s, size_t dn) { return strcpy(d, s); }
+static size_t d_strlen(const char *s) {
+    return s ? strlen(s) : 0;
+}
+
+static char *d_strcpy(char *d, const char *s) {
+    if (!d) return NULL;
+    if (!s) {
+        l_warn("strcpy(%p, NULL) -> guarded", d);
+        *d = '\0';
+        return d;
+    }
+    return strcpy(d, s);
+}
+
+static char *d_strncpy(char *d, const char *s, size_t n) {
+    if (!d) return NULL;
+    if (!s) {
+        l_warn("strncpy(%p, NULL, %zu) -> guarded", d, n);
+        if (n > 0) memset(d, 0, n);
+        return d;
+    }
+    return strncpy(d, s, n);
+}
+
+static int d_strcmp(const char *s1, const char *s2) {
+    if (!s1 && !s2) return 0;
+    if (!s1) return -1;
+    if (!s2) return 1;
+    return strcmp(s1, s2);
+}
+
+static void *d___memcpy_chk(void *d, const void *s, size_t n, size_t dn) {
+    (void)dn;
+    return memmove(d, s, n); // Darwin memcpy tolerates overlap (it is memmove in libSystem)
+}
+static char *d___strcpy_chk(char *d, const char *s, size_t dn) {
+    (void)dn;
+    return d_strcpy(d, s);
+}
 
 // ---------------------------------------------------------------- printf with Darwin ABI (darwin_printf.c)
 
@@ -171,12 +474,12 @@ static void d_NSLog(void *cfstr, ...) {
     va_list ap;
     va_start(ap, cfstr);
     words w = {&ap, NULL};
-    darwin_vformat(buf, sizeof(buf), cfstr ? *(const char **)((uint8_t *)cfstr + 8) : "(nil)", &w);
+    darwin_vformat(buf, sizeof(buf), cfstr ? ns_cstr(cfstr) : "(nil)", &w);
     va_end(ap);
     l_info("NSLog: %s", buf);
 }
 
-static int qsort_guest_cmp;
+static __thread int qsort_guest_cmp;
 static int qsort_tramp(const void *a, const void *b) {
     return (int)call_guest((void *)qsort_guest_cmp, (uint32_t)a, (uint32_t)b, 0, 0);
 }
@@ -204,12 +507,14 @@ static int d_usleep(unsigned us) {
 }
 
 static int d_sysctlbyname(const char *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen) {
+    if (!name) return -1;
     if (!strcmp(name, "hw.machine")) {
         const char *model = "iPhone2,1"; // iPhone 3GS: game selects capable GLES1 texture profile
         size_t len = strlen(model) + 1;
-        if (oldp && *oldlenp >= len)
+        if (oldp && oldlenp && *oldlenp >= len)
             memcpy(oldp, model, len);
-        *oldlenp = len;
+        if (oldlenp)
+            *oldlenp = len;
         return 0;
     }
     errno = ENOENT;
@@ -274,6 +579,10 @@ static int d_pthread_mutex_lock(d_mutex *m) {
 static int d_pthread_mutex_unlock(d_mutex *m) {
     mutex_lazy(m);
     return pthread_mutex_unlock(&m->m);
+}
+static int d_pthread_mutex_trylock(d_mutex *m) {
+    mutex_lazy(m);
+    return pthread_mutex_trylock(&m->m);
 }
 static int d_pthread_mutex_destroy(d_mutex *m) {
     if (m->sig != ML_MUTEX_SIG)
@@ -472,7 +781,7 @@ static int d___maskrune(int c, unsigned long f) {
 
 static char *d___strncpy_chk(char *dst, const char *src, size_t len, size_t dstlen) {
     (void)dstlen;
-    return strncpy(dst, src, len);
+    return d_strncpy(dst, src, len);
 }
 
 static void *d_SCNetworkReachabilityCreateWithName(void *allocator, const char *nodename) {
@@ -487,8 +796,12 @@ static int d_SCNetworkReachabilityGetFlags(void *target, uint32_t *flags) {
 }
 
 static size_t d_strlcpy(char *dst, const char *src, size_t size) {
+    if (!src) {
+        if (dst && size > 0) *dst = '\0';
+        return 0;
+    }
     size_t len = strlen(src);
-    if (size) {
+    if (dst && size) {
         size_t n = len >= size ? size - 1 : len;
         memcpy(dst, src, n);
         dst[n] = '\0';
@@ -654,15 +967,15 @@ SOFTFP static double m_ldexp(double x, int e) { return ldexp(x, e); }
 
 const import_entry darwin_imports[] = {
     // memory / strings
-    D(malloc), D(calloc), D(realloc), D(free), D(memcpy), D(memmove), D(memset), D(memcmp),
-    D(memchr), D(bzero), D(strlen), D(strcmp), D(strcpy), D(strncpy), D(strstr), D(strtok),
-    D(strcat), D(strchr), D(strcoll), D(strcspn), D(strdup), D(strerror), D(strftime),
+    F(malloc, d_malloc), F(calloc, d_calloc), F(realloc, d_realloc), F(free, d_free), F(memcpy, memmove), D(memmove), D(memset), D(memcmp),
+    D(memchr), D(bzero), F(strlen, d_strlen), F(strcmp, d_strcmp), F(strcpy, d_strcpy), F(strncpy, d_strncpy), D(strstr), D(strtok),
+    D(strcat), D(strchr), D(strcoll), D(strcspn), F(strdup, d_strdup), D(strerror), D(strftime),
     F(strlcpy, d_strlcpy), D(strncasecmp), D(strncat), D(strncmp), D(strpbrk), D(strrchr),
     D(strtod), D(strtoul), D(strcasecmp),
     D(atoi), D(rand), D(srand), F(sprintf, d_sprintf), F(vsprintf, d_vsprintf),
     F(vsnprintf, d_vsnprintf), F(snprintf, d_snprintf), F(printf, d_printf),
     F(fprintf, d_fprintf), D(sscanf), D(puts), D(putchar),
-    F(qsort, d_qsort), F(_ZdlPv, free),
+    F(qsort, d_qsort), F(_ZdlPv, d_free),
     F(__memcpy_chk, d___memcpy_chk), F(__strcpy_chk, d___strcpy_chk),
     F(__strncpy_chk, d___strncpy_chk),
     F(__sprintf_chk, d___sprintf_chk), F(__assert_rtn, d___assert_rtn), F(__error, d___error),
@@ -679,7 +992,7 @@ const import_entry darwin_imports[] = {
     F(usleep, d_usleep), F(mach_absolute_time, d_mach_absolute_time),
     F(mach_timebase_info, d_mach_timebase_info), F(sysctlbyname, d_sysctlbyname),
     F(exit, d_exit), D(atexit), F(chdir, d_chdir), F(getcwd, d_getcwd), D(clearerr), D(getenv), D(gethostname),
-    D(perror), D(remove), D(rename), D(system), D(localeconv), D(setlocale),
+    D(perror), F(remove, d_remove), F(rename, d_rename), D(system), D(localeconv), D(setlocale),
     F(ioctl, d_ioctl), F(sigaction, d_sigaction), D(setjmp), D(longjmp),
     // network: offline stubs
     F(socket, d_net_fail), F(connect, d_net_fail), F(bind, d_net_fail), F(listen, d_net_fail),
@@ -697,7 +1010,7 @@ const import_entry darwin_imports[] = {
     F(pthread_mutex_destroy, d_pthread_mutex_destroy), F(pthread_mutexattr_init, d_pthread_mutexattr_init),
     F(pthread_mutexattr_settype, d_pthread_mutexattr_settype), F(sem_open, d_sem_open),
     F(sem_close, d_sem_close), F(sem_unlink, d_sem_unlink), F(sem_wait, d_sem_wait),
-    F(sem_post, d_sem_post), D(pthread_cancel), D(pthread_mutex_trylock),
+    F(sem_post, d_sem_post), D(pthread_cancel), F(pthread_mutex_trylock, d_pthread_mutex_trylock),
     D(pthread_setcanceltype), D(pthread_testcancel), D(sched_yield),
     // C++ / blocks / exceptions / GCD
     F(__cxa_atexit, d___cxa_atexit), F(__cxa_guard_acquire, d___cxa_guard_acquire),

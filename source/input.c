@@ -12,6 +12,7 @@
 #include "input.h"
 #include "log.h"
 #include "macho.h"
+#include "video.h"
 
 #define MAX_SYNTH_TOUCHES 16
 
@@ -45,7 +46,7 @@ static control_config cfg = {
     .r_trigger_x = 420, .r_trigger_y = 260,
     .start_x = 450, .start_y = 30,
     .select_x = 30, .select_y = 30,
-    .deadzone = 12
+    .deadzone = 40
 };
 
 static void load_controls_config(void) {
@@ -90,6 +91,10 @@ static void load_controls_config(void) {
         else if (sscanf(line, "DEADZONE=%d", &v) == 1) cfg.deadzone = v;
     }
     fclose(f);
+    // Run 42: deadzone 12 < Vita stick drift -> permanent phantom touch on the joystick spot,
+    // which held the menu highlight on "Más juegos" and opened IGP when it ended.
+    if (cfg.deadzone < 40)
+        cfg.deadzone = 40;
     l_info("Loaded custom controls from %s", DATA_PATH "controls.txt");
 }
 
@@ -156,6 +161,16 @@ void input_poll(void) {
     }
 
     // Action buttons
+    // Debug shortcut: L + R + TRIANGLE directly plays HoS_trailer.m4v
+    static uint32_t s_last_btns = 0;
+    uint32_t pressed = pad.buttons & ~s_last_btns;
+    s_last_btns = pad.buttons;
+    if ((pad.buttons & (SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER)) == (SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER) &&
+        (pressed & SCE_CTRL_TRIANGLE)) {
+        l_info("[VIDEO] Debug shortcut L+R+TRIANGLE: playing HoS_trailer.m4v");
+        video_play(BUNDLE_PATH "HoS_trailer.m4v");
+    }
+
     if (pad.buttons & SCE_CTRL_CROSS) add_touch(101, cfg.cross_x, cfg.cross_y);
     if (pad.buttons & SCE_CTRL_CIRCLE) add_touch(102, cfg.circle_x, cfg.circle_y);
     if (pad.buttons & SCE_CTRL_SQUARE) add_touch(103, cfg.square_x, cfg.square_y);
