@@ -178,23 +178,18 @@ static void *heap_track(void *p, size_t n, void *lr, const char *what) {
     return p;
 }
 
-// Guest heap blocks get a redzone: RZ bytes of 0xFD after each block, checked on free and swept from gles_present,
-// overflows logged with the allocating caller. A live table records every block's size and allocating caller.
-//
-// Freed blocks are NOT returned to newlib right away. Run 47 proved the game draws from blocks it already freed
-// (3D mesh vtx/tc arrays, the 2D quad index buffer freed at 0x35F24): on iOS the freed memory keeps its contents and
-// the same-size alloc that usually follows hands the same block back, so the stale pointer keeps working there. On
-// newlib the block is reused by someone else at once -> garbage vertices (black wedges). So, like iOS:
+// The game draws from blocks it already freed (Run 47: 3D mesh vtx/tc arrays, the 2D quad index buffer freed at
+// 0x35F24). On iOS the freed memory keeps its contents and the same-size alloc that usually follows hands the same
+// block back, so the stale pointer keeps working there. On newlib the block is reused at once -> garbage vertices
+// (black wedges). So, like iOS:
 //  - free()/realloc() leave the old contents intact and park the block in a FIFO quarantine (Q_BYTES / Q_N);
 //  - gles.c calls heap_pin() for every array a draw uses: a freed block in use is pinned and never released.
-// ponytail: pinned blocks leak (logged as "[MEM] pinned"); if a level-load loop grows them, patch the guest freer.
-#define RZ 64
-#define RZ_BYTE 0xFD
+// A table of guest blocks (size, flags, alloc/free caller) backs both; free() of an unknown block is skipped.
+// ponytail: pinned blocks leak (Run 48: 64 blocks / 590 KB); if a level-load loop grows them, patch the guest freer.
 #define LIVE_BITS 21 // 2M slots (24 MB): live blocks plus up to Q_N quarantined ones
 #define LIVE_N (1u << LIVE_BITS)
-#define LEN_REPORTED 0x80000000u // overflow already logged
-#define LEN_FREED 0x40000000u    // guest freed it; held in quarantine
-#define LEN_PINNED 0x20000000u   // freed but still drawn from: never released
+#define LEN_FREED 0x40000000u  // guest freed it; held in quarantine
+#define LEN_PINNED 0x20000000u // freed but still drawn from: never released
 #define LEN_MASK 0x1FFFFFFFu
 #define Q_BYTES (64u << 20)
 #define Q_N (1u << 19)
@@ -224,7 +219,6 @@ static int live_find(const void *p) {
 
 static void live_add(void *p, size_t n, void *lr) {
     if (!p) return;
-    memset((char *)p + n, RZ_BYTE, RZ);
     pthread_mutex_lock(&live_mtx);
     if (!live_tab) {
         live_tab = calloc(LIVE_N, sizeof(*live_tab));
@@ -244,22 +238,6 @@ static void live_add(void *p, size_t n, void *lr) {
     pthread_mutex_unlock(&live_mtx);
 }
 
-// Logs (once per block) if the guest wrote into the redzone of a block. Caller holds live_mtx.
-static void rz_check(uint32_t i, void *by) {
-    if (live_len[i] & (LEN_REPORTED | LEN_FREED)) return;
-    uint32_t len = live_len[i] & LEN_MASK;
-    const uint8_t *z = (const uint8_t *)live_tab[i] + len;
-    int last = -1;
-    for (int k = 0; k < RZ; k++)
-        if (z[k] != RZ_BYTE) last = k;
-    if (last < 0) return;
-    static int logged;
-    if (logged++ < 64)
-        l_error("[MEM] OVERFLOW: %u-byte block %p from guest 0x%08X written %d+ bytes past its end (seen at 0x%08X)",
-                (unsigned)len, (void *)live_tab[i], (unsigned)live_lr[i], last + 1, guest_off(by));
-    live_len[i] |= LEN_REPORTED;
-}
-
 // Drops slot i (linear probing, backward-shift delete). Caller holds live_mtx.
 static void live_remove(uint32_t i) {
     live_cnt--;
@@ -271,7 +249,7 @@ static void live_remove(uint32_t i) {
     live_tab[i] = 0;
 }
 
-// guest free(): checks the redzone, marks the block freed (contents untouched) and queues it. 0 if p is not live.
+// guest free(): marks the block freed (contents untouched) and queues it. 0 if p is not live.
 static int live_free(void *p, void *by) {
     pthread_mutex_lock(&live_mtx);
     int i = live_find(p);
@@ -279,7 +257,6 @@ static int live_free(void *p, void *by) {
         pthread_mutex_unlock(&live_mtx);
         return 0;
     }
-    rz_check(i, by);
     uint32_t len = live_len[i] & LEN_MASK;
     live_len[i] |= LEN_FREED, live_lr[i] = guest_off(by);
     while (q_cnt && (q_cnt == Q_N || q_bytes + len > Q_BYTES)) { // release the oldest unpinned blocks
@@ -299,6 +276,7 @@ static int live_free(void *p, void *by) {
 
 // A draw uses p: if it is a freed block, keep it forever (iOS semantics, see above).
 void heap_pin(const void *p) {
+    if (!p) return;
     pthread_mutex_lock(&live_mtx);
     int i = live_find(p);
     if (i >= 0 && (live_len[i] & (LEN_FREED | LEN_PINNED)) == LEN_FREED) {
@@ -311,35 +289,6 @@ void heap_pin(const void *p) {
     pthread_mutex_unlock(&live_mtx);
 }
 
-// Checks every live block's redzone (long-lived blocks such as meshes are never freed mid-level).
-void heap_redzone_sweep(void) {
-    pthread_mutex_lock(&live_mtx);
-    if (live_tab)
-        for (uint32_t i = 0; i < LIVE_N; i++)
-            if (live_tab[i]) rz_check(i, __builtin_return_address(0));
-    pthread_mutex_unlock(&live_mtx);
-}
-
-// Diagnostic: formats the guest block containing p as "start+off/len@caller" with FREED/PINNED status
-// (caller = allocator, or freer once freed). Linear scan: only for logged draws.
-void heap_describe(const void *p, char *out, int n) {
-    uintptr_t a = (uintptr_t)p, best = 0;
-    uint32_t bl = 0, blr = 0;
-    pthread_mutex_lock(&live_mtx);
-    if (live_tab)
-        for (uint32_t i = 0; i < LIVE_N; i++) {
-            uintptr_t b = live_tab[i];
-            if (b && b <= a && b > best && a < b + (live_len[i] & LEN_MASK) + RZ)
-                best = b, bl = live_len[i], blr = live_lr[i];
-        }
-    pthread_mutex_unlock(&live_mtx);
-    if (best)
-        snprintf(out, n, "%s%p+%u/%u@0x%06X", bl & LEN_PINNED ? "PINNED " : bl & LEN_FREED ? "FREED " : "", (void *)best,
-                 (unsigned)(a - best), (unsigned)(bl & LEN_MASK), (unsigned)blr);
-    else
-        snprintf(out, n, "%p(not guest heap)", p);
-}
-
 static void bad_free(void *p, void *lr, const char *what) {
     static int logged;
     if (logged++ < 64)
@@ -347,20 +296,20 @@ static void bad_free(void *p, void *lr, const char *what) {
                 guest_off(lr));
 }
 
-static void *rz_malloc(size_t n, void *lr, const char *what) {
-    void *p = heap_track(malloc(n + RZ), n, lr, what);
+static void *tracked_malloc(size_t n, void *lr, const char *what) {
+    void *p = heap_track(malloc(n), n, lr, what);
     live_add(p, n, lr);
     return p;
 }
-static void *d_malloc(size_t n) { return rz_malloc(n, __builtin_return_address(0), "malloc"); }
+static void *d_malloc(size_t n) { return tracked_malloc(n, __builtin_return_address(0), "malloc"); }
 static void *d_calloc(size_t c, size_t n) {
-    void *lr = __builtin_return_address(0), *p = heap_track(calloc(1, c * n + RZ), c * n, lr, "calloc");
+    void *lr = __builtin_return_address(0), *p = heap_track(calloc(c, n), c * n, lr, "calloc");
     live_add(p, c * n, lr);
     return p;
 }
 static void *d_realloc(void *p, size_t n) {
     void *lr = __builtin_return_address(0);
-    if (!p) return rz_malloc(n, lr, "realloc");
+    if (!p) return tracked_malloc(n, lr, "realloc");
     pthread_mutex_lock(&live_mtx);
     int i = live_find(p);
     int live = i >= 0 && !(live_len[i] & LEN_FREED);
@@ -368,10 +317,10 @@ static void *d_realloc(void *p, size_t n) {
     pthread_mutex_unlock(&live_mtx);
     if (!live) {
         bad_free(p, lr, "realloc");
-        return rz_malloc(n, lr, "realloc"); // stale block: give a fresh one rather than resizing memory someone else owns
+        return tracked_malloc(n, lr, "realloc"); // stale block: give a fresh one rather than resizing memory someone else owns
     }
     // Always move: the old block goes through the quarantine like a free(), so stale pointers keep its data.
-    void *r = rz_malloc(n, lr, "realloc");
+    void *r = tracked_malloc(n, lr, "realloc");
     if (!r) return NULL; // C semantics: old block stays valid
     memcpy(r, p, len < n ? len : n);
     live_free(p, lr);
@@ -385,7 +334,7 @@ static void d_free(void *p) {
 static char *d_strdup(const char *s) {
     if (!s) s = "";
     size_t n = strlen(s) + 1;
-    char *p = malloc(n + RZ);
+    char *p = malloc(n);
     if (p) memcpy(p, s, n);
     live_add(p, n, __builtin_return_address(0));
     return p;

@@ -595,6 +595,22 @@ Port of **Hero of Sparta II** (iOS Mach-O) to PlayStation Vita using a custom na
   - Check the `[MEM] pinned` total: if it keeps growing every level, patch the guest freer.
   - Any remaining `[BADDRAW]` names the next culprit.
 
+### Hardware Run 48 — graphics fixed, playable; diagnostics removed (heroofspartaii_048.log)
+
+- Graphics correct, game playable. Zero `[BADDRAW]`.
+- 64 pinned blocks / 590 KB, freed mostly by guest 0x18BBF8 and 0x18BD70.
+- Perf was ~20-36 fps, with stalls from the diagnostics. Removed:
+  - `source/gles.c`:
+    - Traced frames every 600 presents (40 draws, each with `glFinish` + `glReadPixels`) and the `[MTX]`/`[GEOM]`/`[DRAW]` logs.
+    - The whole-FBO `glReadPixels` scan every 120 frames, `[MOVIE]`/caps/clear logs, and the `[GLERR]` `glGetError` wrappers.
+    - Per-texture nonzero-byte scans on upload.
+    - The per-draw vertex scan/filter (`[BADDRAW]`) and the r4 thunk.
+    - About 35 wrappers that only traced are now direct imports.
+  - `source/darwin.c`: the 64-byte redzone per allocation, the 2M-slot redzone sweep every 120 frames, and `heap_describe`.
+- Kept, because they are the fix:
+  - The FIFO quarantine of freed blocks and `heap_pin()` on every draw's arrays.
+  - `ml_guest_lr`, so the rare `[MEM] pinned` / double-free lines name the guest caller.
+
 ## On-Console Deployment Instructions
 
 1. **Install VPK:**
