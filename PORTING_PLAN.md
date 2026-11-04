@@ -194,3 +194,7 @@ The game log lives at `ux0:data/heroofspartaii/logs/heroofspartaii_NNN.log` -- c
 (`source/hle.h`). Use the levels `l_info` / `l_warn` / `l_error` / `l_fatal` and tag subsystems
 (`[MACHO]`, `[OBJC]`, `[GL]`, `[AUDIO]`, `[INPUT]`, `[UNIMPL]`) so logs can be grepped.
 Toolkit: `psvita-toolkit log-standard --fix-dirs`, `psvita-toolkit log-trace --ensure-flag`.
+
+## Siguiente etapa: decompilación dirigida
+
+Ver [`docs/HYBRID_PLAN.md`](docs/HYBRID_PLAN.md) (input nativo, HUD, guardado, memoria, Retina/panorámico, rendimiento) y el mapa [`docs/DECOMP_PROGRESS.md`](docs/DECOMP_PROGRESS.md).

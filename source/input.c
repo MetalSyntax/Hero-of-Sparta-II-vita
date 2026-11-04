@@ -1,3 +1,4 @@
+#include <math.h>
 /**
  * @file input.c
  * @brief Input subsystem mapping PS Vita front touch and physical buttons to iOS touch events.
@@ -13,6 +14,8 @@
 #include "log.h"
 #include "macho.h"
 #include "video.h"
+
+extern int gles_hud_hidden; // gles.c
 
 #define MAX_SYNTH_TOUCHES 16
 
@@ -115,7 +118,7 @@ static void add_touch(int id, int gx, int gy) {
     touches[touch_count].gx = gx;
     touches[touch_count].gy = gy;
     // Map back to screen coords for consistency
-    touches[touch_count].x = (gx * 816 / 480) + 72;
+    touches[touch_count].x = gx * 2;
     touches[touch_count].y = gy * 544 / 320;
     touches[touch_count].down = 1;
     touch_count++;
@@ -138,7 +141,7 @@ void input_poll(void) {
     for (int i = 0; i < num_hw; i++) {
         int x = t.report[i].x / 2;
         int y = t.report[i].y / 2;
-        int gx = (x - 72) * 480 / 816;
+        int gx = x * 480 / 960;
         int gy = y * 320 / 544;
         gx = gx < 0 ? 0 : gx > 479 ? 479 : gx;
         gy = gy < 0 ? 0 : gy > 319 ? 319 : gy;
@@ -160,23 +163,35 @@ void input_poll(void) {
         add_touch(100, jx, jy);
     }
 
-    // Action buttons
-    // Debug shortcut: L + R + TRIANGLE directly plays HoS_trailer.m4v
+    // Right stick: swipe across the attack button in the stick direction (directional attacks).
+    // Touch the centre, slide 48 px out over 3 frames, then lift until the stick returns to neutral.
+    static int rs_frame;
+    int rx = (int)pad.rx - 128, ry = (int)pad.ry - 128;
+    if (abs(rx) <= cfg.deadzone && abs(ry) <= cfg.deadzone) {
+        rs_frame = 0;
+    } else if (rs_frame < 4) {
+        float len = sqrtf((float)(rx * rx + ry * ry)), d = 16.0f * rs_frame++;
+        add_touch(109, cfg.cross_x + (int)(rx * d / len), cfg.cross_y + (int)(ry * d / len));
+    }
+
+    // L + R: toggle the touch controls between hidden (0%, default) and fully visible.
+    // L and R are reserved for this (jump/attack are on Square/Cross), so holding one first never presses anything.
     static uint32_t s_last_btns = 0;
     uint32_t pressed = pad.buttons & ~s_last_btns;
     s_last_btns = pad.buttons;
-    if ((pad.buttons & (SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER)) == (SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER) &&
-        (pressed & SCE_CTRL_TRIANGLE)) {
-        l_info("[VIDEO] Debug shortcut L+R+TRIANGLE: playing HoS_trailer.m4v");
-        video_play(BUNDLE_PATH "HoS_trailer.m4v");
+    const uint32_t LR = SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER;
+    if ((pad.buttons & LR) == LR) {
+        if (pressed & LR) {
+            gles_hud_hidden = !gles_hud_hidden;
+            l_info("[HUD] touch controls %s", gles_hud_hidden ? "hidden (0%)" : "visible (100%)");
+        }
     }
 
+    // Action buttons
     if (pad.buttons & SCE_CTRL_CROSS) add_touch(101, cfg.cross_x, cfg.cross_y);
-    if (pad.buttons & SCE_CTRL_CIRCLE) add_touch(102, cfg.circle_x, cfg.circle_y);
+    if (pad.buttons & SCE_CTRL_CIRCLE) add_touch(102, cfg.circle_x, cfg.circle_y); // grab enemy / start finisher
     if (pad.buttons & SCE_CTRL_SQUARE) add_touch(103, cfg.square_x, cfg.square_y);
     if (pad.buttons & SCE_CTRL_TRIANGLE) add_touch(104, cfg.triangle_x, cfg.triangle_y);
-    if (pad.buttons & SCE_CTRL_LTRIGGER) add_touch(105, cfg.l_trigger_x, cfg.l_trigger_y);
-    if (pad.buttons & SCE_CTRL_RTRIGGER) add_touch(106, cfg.r_trigger_x, cfg.r_trigger_y);
     if (pad.buttons & SCE_CTRL_START) add_touch(107, cfg.start_x, cfg.start_y);
     if (pad.buttons & SCE_CTRL_SELECT) add_touch(108, cfg.select_x, cfg.select_y);
 }

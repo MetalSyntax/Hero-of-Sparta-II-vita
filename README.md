@@ -18,17 +18,19 @@ An unofficial, native **iOS-to-PS Vita wrapper port** of *Hero of Sparta II* (or
 
 ## 🎮 Status & Playability
 
-**Status: WIP (boots, menu not rendered yet)**
+**Status: Playable (v1.0)**
 
-The game boots on physical PlayStation Vita hardware, loads its assets, plays the intro trailer with sound and reaches the title screen with its music, but the title screen and menus still render **black**.
+The game boots on physical PlayStation Vita hardware, plays the intro trailer, and is playable from the title screen through gameplay with correct graphics and sound.
 
-- [x] **Mach-O loader**: loads the iOS ARM executable at a fixed base (`MACHO_SLIDE = 0x98000000`), applies **39,357** rebase words (non-PIE image, including `-mdynamic-no-pic` literal pools and switch tables in `__text`), resolves **1,930** dynamic imports / relocations (0 unimplemented), runs the **298** global constructors, and enters the game thread. *Verified on console.*
-- [x] **Videos**: `HoS_trailer.m4v` (`MPMoviePlayerController`) plays with hardware H.264 decoding (`SceVideodec` / `sceAvcdec`) and software AAC audio via FFmpeg (`libavcodec`); it can be skipped. *Verified on console.*
-- [x] **Audio**: menu music plays. *Verified on console.*
-- [ ] **Graphics**: GLES 1.x → **vitaGL** (compiled with `SOFTFP_ABI=1`). The game renders into a 320×480 framebuffer that is rotated and scaled to the Vita's 960×544 screen. Texture uploads (RGBA4444 and PVRTC 4bpp) succeed, but the title screen background and menu sprites draw as fully transparent. Under investigation.
-- [ ] **Touch & Controls**: front touchscreen and physical buttons are mapped to synthesized touches (see [Controls](#controls)); not yet testable in-game.
-- [ ] **Saves**: iOS `Documents/` is redirected to `ux0:data/heroofspartaii/saves/`; not yet tested in-game.
-- [x] **Offline bypasses**: Gameloft Live / network uploads are skipped by design.
+- [x] **Mach-O loader**: loads the iOS ARM executable at a fixed base (`MACHO_SLIDE = 0x98000000`), applies **39,357** rebase words (non-PIE image, including `-mdynamic-no-pic` literal pools and ARM switch jump tables in `__text`), resolves **1,930** dynamic imports / relocations (0 unimplemented), runs the **298** global constructors, and enters the game thread. *Verified on console.*
+- [x] **Graphics**: GLES 1.x → **vitaGL** (`SOFTFP_ABI=1`). The game renders into a 320×480 framebuffer that is rotated onto the Vita's 960×544 screen. Menus, HUD and 3D levels render correctly. *Verified on console.*
+- [x] **Fullscreen 16:9**: no black side bars. The 480×320 image is stretched to 960×544, so HUD, menus and cutscene letterboxing reach the screen edges, and touch input is mapped with the same stretch.
+- [x] **Videos**: `HoS_trailer.m4v` plays with hardware H.264 decoding (`SceVideodec`) and AAC audio via FFmpeg; it can be skipped. *Verified on console.*
+- [x] **Audio**: music and sound effects. *Verified on console.*
+- [x] **Touch & Controls**: front touchscreen plus a full physical button mapping (see [Controls](#controls)). *Verified on console.*
+- [x] **Hidden touch controls**: the on-screen joystick and action buttons are hidden (0% opacity) by default; **L + R** toggles them to 100%.
+- [x] **Saves**: iOS `Documents/` is redirected to `ux0:data/heroofspartaii/saves/` (`savegame`, `savebackup`, `statistics0`, `saveachievements`, `savesettings`) and the files are written. Continue resumes from the last checkpoint (verified on console); every save read/write/delete is logged with a `[SAVE]` tag.
+- [x] **Offline bypasses**: Gameloft Live, ads and network uploads are skipped by design.
 
 ---
 
@@ -64,30 +66,27 @@ This software does NOT contain original game code, binaries, copyrighted graphic
 
 ## Controls
 
-Physical buttons are translated into touches at fixed points of the 480×320 game screen. The points can be edited in `ux0:data/heroofspartaii/controls.txt`.
+Physical buttons are translated into touches on the game's own on-screen buttons. The touch points can be edited in `ux0:data/heroofspartaii/controls.txt`.
 
-| Input | Action | Status |
-| :---: | :--- | :---: |
-| **Front Touchscreen** | Full touch UI (menus, HUD) | ⚠️ Untested (menu not visible yet) |
-| **Left Stick / D-Pad** | Virtual joystick | ⚠️ Untested |
-| **Cross (✖)** | Touch at (420, 260) | ⚠️ Untested |
-| **Circle (●)** | Touch at (370, 200) | ⚠️ Untested |
-| **Square (◼)** | Touch at (440, 180) | ⚠️ Untested |
-| **Triangle (▲)** | Touch at (350, 275) | ⚠️ Untested |
-| **L / R Triggers** | Touch at (440, 180) / (420, 260) | ⚠️ Untested |
-| **Start / Select** | Touch at (450, 30) / (30, 30) | ⚠️ Untested |
-| **Cross / Circle / Start** | Skip the trailer video | ✅ Working |
-
-> [!TIP]
-> **L + R + Triangle** replays `HoS_trailer.m4v` (debug shortcut).
+| Input | Action |
+| :---: | :--- |
+| **Front Touchscreen** | Full touch UI (menus, HUD) |
+| **Left Stick / D-Pad** | Move (virtual joystick) |
+| **Cross (✖)** | Attack |
+| **Right Stick** | Directional attack (swipe on the attack button) |
+| **Square (◼)** | Jump |
+| **Triangle (▲)** | Defend |
+| **Circle (●)** | Grab enemy / start finisher cutscene |
+| **Start** | Shield button |
+| **Select** | Pause menu |
+| **L + R** | Show / hide the on-screen touch controls (hidden by default) |
+| **Cross / Circle / Start** | Skip the trailer video |
 
 ---
 
 ## Known Issues
 
-- **Black title screen and menus**: the game draws its title screen and menus, but the background and menu textures come out fully transparent. This is the current blocker.
 - **Slow start-up**: the game opens ~400 sound files at boot before the trailer starts.
-- **UIImage textures**: `UIImage imageWithData:` and `CGContextDrawImage` are stubs, so any texture the game builds from PNG/JPEG data is empty.
 - **Online features disabled**: Gameloft Live, ads and network uploads are bypassed by design.
 - **Crash dumps** are written by the system to `ux0:data/` (not to the game folder).
 

@@ -55,3 +55,4 @@ cmake-build-*/
 # Full disassembly / Ghidra pseudo-C of the original binary (anti-DMCA)
 /decompiled/disasm/
 /decompiled/*/ghidra/
+screenshots

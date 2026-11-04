@@ -10,10 +10,13 @@
  *          All imported gl* functions take only integer/pointer arguments (*x variants): no SoftFP issues.
  *          GL_FIXED vertex arrays are converted to float immediately before draw calls.
  */
+#include <psp2/kernel/processmgr.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vitaGL.h>
 
+#include "cgbi.h"
 #include "gles.h"
 #include "hle.h"
 #include "imports.h"
@@ -25,16 +28,20 @@
 #define FB_H 480
 #define SCR_W 960
 #define SCR_H 544
-// Destination rectangle: 480x320 scaled to Vita screen height (1.7x) and centered horizontally.
+// Fullscreen: the 480x320 game image is stretched to the whole 960x544 screen (x2 horizontally, x1.7
+// vertically). input.c maps touches with the same stretch. (Run 51: the Zombie Infection style wider field of
+// view left the iPhone-anchored HUD and cutscene letterbox short of the screen edges, with bare 3D beside them.)
 #define DST_H SCR_H
-#define DST_W (DST_H * FB_H / FB_W)
-#define DST_X ((SCR_W - DST_W) / 2)
+#define DST_W SCR_W
+#define DST_X 0
 
 #define GL_FRAMEBUFFER_COMPLETE_OES 0x8CD5
 #define GL_RENDERBUFFER_WIDTH_OES 0x8D42
 #define GL_RENDERBUFFER_HEIGHT_OES 0x8D43
 
 static GLuint fbo, fbo_tex;
+// Shown instead of the empty FBO until the game draws its first frame (~20 s of sound loading at boot).
+static GLuint splash_tex;
 
 // Cached state overwritten during blit that glGet cannot fully query:
 typedef struct {
@@ -193,6 +200,8 @@ uint32_t gles_get_draw_calls(void) {
 }
 
 void heap_pin(const void *p); // darwin.c
+static const void *hud_filter(GLenum mode, int n, int count);
+static void hud_restore(const void *f);
 
 // Run 47: the game draws from arrays it already freed (benign on iOS). Every client array a draw reads is pinned
 // so the allocator never hands it to someone else (no-op for live blocks and non-heap pointers).
@@ -200,7 +209,9 @@ static void pin_draw_arrays(const void *indices) {
     heap_pin(vtx.ptr), heap_pin(tc[0].ptr), heap_pin(tc[1].ptr), heap_pin(col.ptr), heap_pin(indices);
 }
 
+static uint64_t draw_us; // time spent in draw calls (wrapper + vitaGL), reported with the frame log
 static void g_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
+    uint64_t t0 = sceKernelGetProcessTimeWide();
     gles_draw_calls++;
     pin_draw_arrays(NULL);
     int n = first + count;
@@ -211,7 +222,10 @@ static void g_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
             apply_texcoord(u, n);
     if (col.type == GL_FIXED)
         apply_color(n);
+    const void *h = hud_filter(mode, n, count);
     glDrawArrays(mode, first, count);
+    hud_restore(h);
+    draw_us += sceKernelGetProcessTimeWide() - t0;
 }
 
 static inline GLuint get_current_program(void) {
@@ -284,6 +298,7 @@ static void init_quad_indices(void) {
 }
 
 static void g_glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices) {
+    uint64_t t0 = sceKernelGetProcessTimeWide();
     gles_draw_calls++;
     void *caller = __builtin_return_address(0);
     init_quad_indices();
@@ -349,7 +364,19 @@ static void g_glDrawElements(GLenum mode, GLsizei count, GLenum type, const void
             apply_color(n);
     }
 
+    const void *h = NULL;
+    if (!eb) {
+        int n = 0;
+        for (int i = 0; i < count; i++) {
+            int v = type == GL_UNSIGNED_BYTE ? ((const uint8_t *)indices)[i] : ((const uint16_t *)indices)[i];
+            if (v >= n)
+                n = v + 1;
+        }
+        h = hud_filter(mode, n, count);
+    }
     glDrawElements(mode, count, type, indices);
+    hud_restore(h);
+    draw_us += sceKernelGetProcessTimeWide() - t0;
 }
 
 static void g_glGetPointerv(GLenum pname, void **out) {
@@ -450,6 +477,137 @@ static void g_glDeleteFramebuffersOES(GLsizei n, const GLuint *ids) {
 
 static void g_glNoop(void) {}
 
+// Draws into the window framebuffer (where the HUD lives), as opposed to offscreen render targets.
+static int wide_target(void) { return fbo && bound_fb == fbo; }
+
+// ---------------------------------------------------------------- touch controls opacity (L + R)
+
+// The game has no opacity setting and no symbols, so the on-screen controls are hidden at draw level: in 2D
+// (orthographic) quad batches drawn with the HUD texture, every quad sitting on a control (joystick, attack,
+// jump, defense; positions in 480x320 game space, measured on console screenshots) collapses to a point.
+// The HUD texture is learned from the first square sprite drawn exactly on a control, so menus that use
+// other textures are never touched. Touch input is unaffected (it is read before drawing).
+int gles_hud_hidden = 1;
+static const struct { float x, y, r; } hud_spots[] = {
+    {69, 250, 60},  // virtual joystick (base + knob travel)
+    {395, 234, 52}, // attack (circle + crosshair lines)
+    {455, 191, 26}, // jump
+    {351, 294, 26}, // defense
+};
+#define NSPOTS (sizeof(hud_spots) / sizeof(hud_spots[0]))
+static GLuint hud_tex[4];
+static float *hud_buf;
+static int hud_cap;
+
+static void g_glDeleteTextures(GLsizei n, const GLuint *ids) {
+    for (int k = 0; k < n; k++)
+        for (unsigned i = 0; i < 4; i++)
+            if (hud_tex[i] == ids[k])
+                hud_tex[i] = 0;
+    glDeleteTextures(n, ids);
+}
+
+static float vtx_get(int i, int c) {
+    int es = vtx.type == GL_SHORT ? 2 : vtx.type == GL_BYTE ? 1 : 4;
+    const uint8_t *p = (const uint8_t *)vtx.ptr + i * (vtx.stride ? vtx.stride : vtx.size * es) + c * es;
+    switch (vtx.type) {
+    case GL_FLOAT: return *(const float *)p;
+    case GL_FIXED: return *(const int32_t *)p * (1.0f / 65536.0f);
+    case GL_SHORT: return *(const int16_t *)p;
+    default: return *(const int8_t *)p;
+    }
+}
+
+static int hud_spot(float cx, float cy) {
+    for (unsigned s = 0; s < NSPOTS; s++) {
+        float dx = cx - hud_spots[s].x, dy = cy - hud_spots[s].y;
+        if (dx * dx + dy * dy <= hud_spots[s].r * hud_spots[s].r)
+            return s;
+    }
+    return -1;
+}
+
+// Returns the vertex array to draw with (hidden quads collapsed) or NULL to draw the game's own.
+static const void *hud_filter(GLenum mode, int n, int count) {
+    if (!gles_hud_hidden || !wide_target() || !vtx.ptr || vtx.size < 2 || n < 4 || (n & 3) || n > 4096)
+        return NULL;
+    // Quad batches only: indexed triangles (6 indices per 4 vertices) or one 4-vertex strip/fan sprite.
+    if (!(mode == GL_TRIANGLES && count == n / 4 * 6) && !((mode == GL_TRIANGLE_STRIP || mode == GL_TRIANGLE_FAN) && n == 4))
+        return NULL;
+    GLint ab = 0, tex = 0;
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &ab);
+    if (ab)
+        return NULL;
+    float pm[16], mv[16], m[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, pm);
+    // 2D (orthographic) only: perspective has w row (0, 0, -1, 0). Run 53: the HUD projection has pm[11] = -1
+    // (w = 1 - z, z = 0 for sprites), so only pm[15] tells them apart.
+    if (pm[15] == 0)
+        return NULL;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &tex);
+    int known = 0;
+    for (unsigned i = 0; i < 4; i++)
+        known |= tex && hud_tex[i] == (GLuint)tex;
+    glGetFloatv(GL_MODELVIEW_MATRIX, mv);
+    for (int c = 0; c < 4; c++)
+        for (int r = 0; r < 4; r++)
+            m[c * 4 + r] = pm[r] * mv[c * 4] + pm[4 + r] * mv[c * 4 + 1] + pm[8 + r] * mv[c * 4 + 2] + pm[12 + r] * mv[c * 4 + 3];
+    int hidden = 0;
+    for (int q = 0; q < n; q += 4) {
+        float x0 = 1e9f, y0 = 1e9f, x1 = -1e9f, y1 = -1e9f;
+        for (int i = q; i < q + 4; i++) {
+            float x = vtx_get(i, 0), y = vtx_get(i, 1), z = vtx.size > 2 ? vtx_get(i, 2) : 0;
+            float nx = m[0] * x + m[4] * y + m[8] * z + m[12], ny = m[1] * x + m[5] * y + m[9] * z + m[13];
+            // NDC -> 480x320 landscape game space (inverse of the blit in gles_present).
+            float gx = 240 * (1 - ny), gy = 160 * (1 - nx);
+            x0 = gx < x0 ? gx : x0, x1 = gx > x1 ? gx : x1, y0 = gy < y0 ? gy : y0, y1 = gy > y1 ? gy : y1;
+        }
+        float w = x1 - x0, h = y1 - y0, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+        if (w > 110 || h > 110)
+            continue;
+        int s = hud_spot(cx, cy);
+        if (s < 0)
+            continue;
+        if (!known) {
+            // Learn: a square control-sized sprite centered on a control.
+            float dx = cx - hud_spots[s].x, dy = cy - hud_spots[s].y;
+            if (!tex || w < 24 || h < 24 || w > 1.3f * h || h > 1.3f * w || dx * dx + dy * dy > 12 * 12)
+                continue;
+            for (unsigned i = 0; i < 4; i++)
+                if (!hud_tex[i]) {
+                    hud_tex[i] = tex;
+                    break;
+                }
+            known = 1;
+            l_info("[HUD] control texture %d learned from a %dx%d sprite at (%d,%d)", tex, (int)w, (int)h, (int)cx, (int)cy);
+            q = -4; // rescan this batch now that the texture is known
+            hidden = 0;
+            continue;
+        }
+        if (!hidden) {
+            if (n * vtx.size > hud_cap) {
+                hud_cap = n * vtx.size;
+                hud_buf = realloc(hud_buf, hud_cap * sizeof(float));
+            }
+            for (int i = 0; i < n; i++)
+                for (int c = 0; c < vtx.size; c++)
+                    hud_buf[i * vtx.size + c] = vtx_get(i, c);
+        }
+        hidden++;
+        for (int i = q + 1; i < q + 4; i++)
+            memcpy(&hud_buf[i * vtx.size], &hud_buf[q * vtx.size], vtx.size * sizeof(float));
+    }
+    if (!hidden)
+        return NULL;
+    glVertexPointer(vtx.size, GL_FLOAT, 0, hud_buf);
+    return hud_buf;
+}
+
+static void hud_restore(const void *f) {
+    if (f && vtx.type != GL_FIXED) // GL_FIXED arrays are re-converted by the next draw anyway
+        apply_vertex(0);
+}
+
 static void g_glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint *v) {
     *v = pname == GL_RENDERBUFFER_WIDTH_OES ? FB_W : pname == GL_RENDERBUFFER_HEIGHT_OES ? FB_H : 0;
 }
@@ -457,7 +615,9 @@ static void g_glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint
 // ---------------------------------------------------------------- init / present
 
 void gles_init(void) {
-    vglUseTripleBuffering(GL_FALSE);
+    // Run 54: gameplay frames take a bit over 33 ms; with double buffering + vsync each one waited for the third
+    // vblank (20 fps). A third display buffer (2 MB) lets the game start the next frame instead of waiting.
+    vglUseTripleBuffering(GL_TRUE);
     // vitaGL takes every pool but these thresholds. sceVideodecInitLibrary + the decoder frame buffer need
     // PHYCONT pages: with phycont_threshold 0 (vglInitExtended) it failed 0x80024302 with phycont 0 KB free.
     vglInitWithCustomThreshold(0, SCR_W, SCR_H, 16 * 1024 * 1024, 0, 16 * 1024 * 1024,
@@ -475,6 +635,53 @@ void gles_init(void) {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     vglSwapBuffers(GL_FALSE);
+
+    // iOS launch image (portrait, Apple CgBI PNG), drawn rotated 90 degrees counter-clockwise to landscape.
+    void *px = NULL, *file = NULL;
+    int w = 0, h = 0, bpp, len = 0;
+    FILE *f = fopen("ux0:data/heroofspartaii/game_app/Default@2x.png", "rb");
+    if (f) {
+        fseek(f, 0, SEEK_END);
+        len = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        file = malloc(len);
+        if (file && fread(file, 1, len, f) == (size_t)len)
+            px = cgbi_decode(file, len, &w, &h, &bpp, malloc);
+        fclose(f);
+    }
+    if (px) {
+        glGenTextures(1, &splash_tex);
+        glBindTexture(GL_TEXTURE_2D, splash_tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, px);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // Drawn here directly: gles_present touches guest memory, which is not loaded yet (run 52 crash).
+        static const float xy[] = {0, 0, SCR_W, 0, 0, SCR_H, SCR_W, SCR_H}, uv[] = {1, 0, 1, 1, 0, 0, 0, 1};
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, SCR_W, SCR_H);
+        glEnable(GL_TEXTURE_2D);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrthof(0, SCR_W, SCR_H, 0, -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glVertexPointer(2, GL_FLOAT, 0, xy);
+        glTexCoordPointer(2, GL_FLOAT, 0, uv);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        vglSwapBuffers(GL_FALSE); // stays on screen until the next swap
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glViewport(0, 0, FB_W, FB_H);
+    }
+    free(file);
+    free(px);
+    if (!splash_tex)
+        l_warn("splash: cannot load game_app/Default@2x.png");
     l_info("vitaGL: FBO %ux%u -> screen %ux%u at x=%d", FB_W, FB_H, DST_W, DST_H, DST_X);
 }
 
@@ -482,8 +689,18 @@ void gles_present(void) {
     static uint32_t s_presents;
     objc_pump();
     s_presents++;
+    static uint64_t s_swap_us, s_last;
     if (s_presents == 1 || (s_presents % 120) == 0) {
-        l_info("[GLES] Frame %u presented (%u draw calls this frame)", s_presents, gles_draw_calls);
+        uint64_t now = sceKernelGetProcessTimeWide();
+        l_info("[GLES] Frame %u presented (%u draw calls this frame), %.1f fps, swap wait %.1f ms/frame, draws %.1f ms/frame",
+               s_presents, gles_draw_calls, s_last ? 120e6 / (double)(now - s_last) : 0.0, s_swap_us / 120e3,
+               draw_us / 120e3);
+        s_last = now, s_swap_us = 0, draw_us = 0;
+    }
+    // The first frame with draws ends the splash; until then show it instead of the empty FBO.
+    if (splash_tex && gles_draw_calls) {
+        glDeleteTextures(1, &splash_tex);
+        splash_tex = 0;
     }
     gles_draw_calls = 0;
 
@@ -518,7 +735,7 @@ void gles_present(void) {
     glDisableClientState(GL_NORMAL_ARRAY);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-    glBindTexture(GL_TEXTURE_2D, fbo_tex);
+    glBindTexture(GL_TEXTURE_2D, splash_tex ? splash_tex : fbo_tex);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -531,12 +748,15 @@ void gles_present(void) {
     // Screen corners (top-left, top-right, bottom-left, bottom-right) -> vertical FBO texture.
     // Assumed landscape-right rotation (top edge of FBO aligns to left edge of screen).
     // Adjust UV mapping table if target game renders mirrored or inverted.
-    static const float uv[] = {1, 1, 1, 0, 0, 1, 0, 0};
+    static const float fbo_uv[] = {1, 1, 1, 0, 0, 1, 0, 0}, splash_uv[] = {1, 0, 1, 1, 0, 0, 0, 1};
+    const float *uv = splash_tex ? splash_uv : fbo_uv;
     const float xy[] = {DST_X, 0, DST_X + DST_W, 0, DST_X, SCR_H, DST_X + DST_W, SCR_H};
     glVertexPointer(2, GL_FLOAT, 0, xy);
     glTexCoordPointer(2, GL_FLOAT, 0, uv);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    uint64_t t0 = sceKernelGetProcessTimeWide();
     vglSwapBuffers(ime_active()); // GL_TRUE while system dialog is active
+    s_swap_us += sceKernelGetProcessTimeWide() - t0;
 
     // Restore guest OpenGL state.
     glPopMatrix();
@@ -611,7 +831,7 @@ const import_entry gles_imports[] = {
     D(glCullFace),
     F(glDeleteBuffers, g_glDeleteBuffers), F(glDeleteFramebuffersOES, g_glDeleteFramebuffersOES),
     D(glDeleteProgram), F(glDeleteRenderbuffersOES, glDeleteRenderbuffers),
-    D(glDeleteShader), D(glDeleteTextures),
+    D(glDeleteShader), F(glDeleteTextures, g_glDeleteTextures),
     D(glDepthFunc), D(glDepthMask),
     F(glDisable, g_glDisable), D(glDisableClientState), F(glDisableVertexAttribArray, g_glDisableVertexAttribArray),
     F(glDrawArrays, g_glDrawArrays), F(glDrawElements, g_glDrawElements),

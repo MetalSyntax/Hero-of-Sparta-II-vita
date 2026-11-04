@@ -611,6 +611,27 @@ Port of **Hero of Sparta II** (iOS Mach-O) to PlayStation Vita using a custom na
   - The FIFO quarantine of freed blocks and `heap_pin()` on every draw's arrays.
   - `ml_guest_lr`, so the rare `[MEM] pinned` / double-free lines name the guest caller.
 
+### Pre-release build (run 49 pending)
+
+- `source/gles.c`: fullscreen like Zombie Infection. Window-FBO draws scale clip Y by `WIDE_K` (816/960), scissor and
+  `glCopyTex*` follow; the blit fills 960 px. Touch mapping `(x-72)*480/816` unchanged (HUD stays in the central 816 px).
+- `source/gles.c`: touch controls hidden by default. 2D quad batches drawn with the "HUD texture" collapse the quads that
+  sit on joystick (69,250), attack (395,234), jump (455,191), defense (351,294). The texture is learned from the first
+  square sprite on a control (`[HUD] control texture N learned ...`). Menus with other textures are untouched.
+- `source/input.c`: L + R toggles the HUD (consumed, no jump/attack). Circle unmapped. L+R+Triangle trailer shortcut removed.
+- `source/darwin.c`: `[SAVE]` log for every open/remove under `saves/` (size on read, guest lr on remove).
+- Save analysis (static): checkpoint save = 0x7a9a0 (writes statisticsN, saveachievements, savegame); Continue reads
+  the level from savegame (0x7e5xx); 0x7ae80 restores the checkpoint only if the saved level and entity count match.
+  `savegame`/`savebackup` are deleted by 0x7a5e0 (new game / bad statistics header) and 0x81190. No save on suspend
+  (applicationWillResignActive only pauses).
+- Run 50 (`heroofspartaii_050.log`, build 8031784): graphics broke after reaching a new stage (black wedges again).
+  The memblock-freed mesh arrays (0x18BBF8 / 0x18BD70) left the 64 MB FIFO during the stage load before their first
+  draw. Fix: two quarantines by freer, other 40 MB / ustl::memblock 96 MB (`source/darwin.c`), and
+  `[MEM] memblock quarantine full` when the memblock one starts releasing.
+- Circle restored at (370,200): grab enemy / start finisher (user report).
+- Next run: confirm fullscreen, `[HUD]` learned line and hidden controls, and play past a checkpoint -> quit -> Continue;
+  the `[SAVE]` lines say whether savegame is written, read, or removed (and by which guest caller).
+
 ## On-Console Deployment Instructions
 
 1. **Install VPK:**

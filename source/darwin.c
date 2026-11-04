@@ -107,14 +107,27 @@ static FILE *d_fopen(const char *path, const char *mode) {
     // Successful opens are not logged: ~800 sound files at boot, each line fflush'ed, added seconds of load time.
     if (!f)
         l_warn("fopen(%s -> %s, %s) -> FAILED (errno %d)", path, p, mode, errno);
+    else if (!strncmp(p, DOCS_PATH, sizeof(DOCS_PATH) - 1)) { // save files: rare, logged to trace progress
+        long size = -1;
+        if (mode[0] == 'r' && !fseek(f, 0, SEEK_END)) {
+            size = ftell(f);
+            fseek(f, 0, SEEK_SET);
+        }
+        l_info("[SAVE] fopen(%s, %s) ok, size %ld", p + sizeof(DOCS_PATH) - 1, mode, size);
+    }
     return f;
 }
 
+static inline uint32_t guest_off(void *lr);
 static int d_remove(const char *path) {
     if (!path) return -1;
     char p[512];
     darwin_path(path, p, sizeof(p));
-    return remove(p);
+    int r = remove(p);
+    if (!strncmp(p, DOCS_PATH, sizeof(DOCS_PATH) - 1))
+        l_info("[SAVE] remove(%s) -> %d (guest lr 0x%06X)", p + sizeof(DOCS_PATH) - 1, r,
+               (unsigned)guest_off(__builtin_return_address(0)));
+    return r;
 }
 
 static int d_rename(const char *old, const char *new) {
@@ -182,7 +195,7 @@ static void *heap_track(void *p, size_t n, void *lr, const char *what) {
 // 0x35F24). On iOS the freed memory keeps its contents and the same-size alloc that usually follows hands the same
 // block back, so the stale pointer keeps working there. On newlib the block is reused at once -> garbage vertices
 // (black wedges). So, like iOS:
-//  - free()/realloc() leave the old contents intact and park the block in a FIFO quarantine (Q_BYTES / Q_N);
+//  - free()/realloc() leave the old contents intact and park the block in a FIFO quarantine (q_budget / Q_N);
 //  - gles.c calls heap_pin() for every array a draw uses: a freed block in use is pinned and never released.
 // A table of guest blocks (size, flags, alloc/free caller) backs both; free() of an unknown block is skipped.
 // ponytail: pinned blocks leak (Run 48: 64 blocks / 590 KB); if a level-load loop grows them, patch the guest freer.
@@ -191,14 +204,18 @@ static void *heap_track(void *p, size_t n, void *lr, const char *what) {
 #define LEN_FREED 0x40000000u  // guest freed it; held in quarantine
 #define LEN_PINNED 0x20000000u // freed but still drawn from: never released
 #define LEN_MASK 0x1FFFFFFFu
-#define Q_BYTES (64u << 20)
 #define Q_N (1u << 19)
+// Run 50: a new stage frees more than 64 MB while loading, so mesh arrays freed early in the load were recycled
+// before their first draw (black wedges again). Blocks freed by the ustl::memblock destructors (where every
+// pinned mesh array comes from) get their own FIFO, so the loader's other churn can't push them out.
+#define FREER_MEMBLOCK(off) ((off) == 0x18BBF8 || (off) == 0x18BD70)
+static const uint32_t q_budget[2] = {40u << 20, 96u << 20}; // [0] other freers, [1] ustl::memblock
 static uintptr_t *live_tab;
 static uint32_t *live_len, *live_lr; // size | flags, guest caller (alloc; free once freed)
 static uint32_t live_cnt;
 static pthread_mutex_t live_mtx = PTHREAD_MUTEX_INITIALIZER;
-static void **qring;
-static uint32_t q_head, q_cnt, q_bytes, pin_cnt, pin_bytes;
+static void **qring[2];
+static uint32_t q_head[2], q_cnt[2], q_bytes[2], q_evicted[2], pin_cnt, pin_bytes;
 
 extern char ml_align_ret[];
 extern uint32_t ml_guest_lr;
@@ -224,7 +241,8 @@ static void live_add(void *p, size_t n, void *lr) {
         live_tab = calloc(LIVE_N, sizeof(*live_tab));
         live_len = calloc(LIVE_N, sizeof(*live_len));
         live_lr = calloc(LIVE_N, sizeof(*live_lr));
-        qring = calloc(Q_N, sizeof(*qring));
+        qring[0] = calloc(Q_N, sizeof(*qring[0]));
+        qring[1] = calloc(Q_N, sizeof(*qring[1]));
     }
     if (live_cnt < LIVE_N - LIVE_N / 8) {
         uint32_t i = live_hash((uintptr_t)p);
@@ -257,19 +275,22 @@ static int live_free(void *p, void *by) {
         pthread_mutex_unlock(&live_mtx);
         return 0;
     }
-    uint32_t len = live_len[i] & LEN_MASK;
-    live_len[i] |= LEN_FREED, live_lr[i] = guest_off(by);
-    while (q_cnt && (q_cnt == Q_N || q_bytes + len > Q_BYTES)) { // release the oldest unpinned blocks
-        void *o = qring[(q_head - q_cnt) & (Q_N - 1)];
-        q_cnt--;
+    uint32_t len = live_len[i] & LEN_MASK, off = guest_off(by);
+    live_len[i] |= LEN_FREED, live_lr[i] = off;
+    int q = FREER_MEMBLOCK(off);
+    while (q_cnt[q] && (q_cnt[q] == Q_N || q_bytes[q] + len > q_budget[q])) { // release the oldest unpinned blocks
+        void *o = qring[q][(q_head[q] - q_cnt[q]) & (Q_N - 1)];
+        q_cnt[q]--;
         int k = live_find(o);
         if (k < 0) continue;
-        q_bytes -= live_len[k] & LEN_MASK;
+        q_bytes[q] -= live_len[k] & LEN_MASK;
         if (live_len[k] & LEN_PINNED) continue;
         live_remove(k);
         free(o);
+        if (q && !(q_evicted[1]++ & 4095)) // a pinned-mesh freer's block left the quarantine: wedges possible
+            l_info("[MEM] memblock quarantine full: %u blocks released so far", (unsigned)q_evicted[1]);
     }
-    qring[q_head++ & (Q_N - 1)] = p, q_cnt++, q_bytes += len;
+    qring[q][q_head[q]++ & (Q_N - 1)] = p, q_cnt[q]++, q_bytes[q] += len;
     pthread_mutex_unlock(&live_mtx);
     return 1;
 }
